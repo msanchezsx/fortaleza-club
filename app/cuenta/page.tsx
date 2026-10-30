@@ -3,6 +3,7 @@ import Link from "next/link";
 import { InvitarAmigos, type Referidos } from "@/components/InvitarAmigos";
 import { MiCita } from "@/components/MiCita";
 import { MiPerfil } from "@/components/MiPerfil";
+import { MisFotos } from "@/components/MisFotos";
 import { Cargando, Panel } from "@/components/Panel";
 import { TarjetaLealtad, type Lealtad } from "@/components/TarjetaLealtad";
 import { etiquetaDia, horaBonita } from "@/lib/citas";
@@ -62,6 +63,7 @@ async function Cuenta() {
       )}
       {tarjeta && <TarjetaLealtad lealtad={tarjeta} />}
       {tarjeta && referidos && <InvitarAmigos codigo={tarjeta.codigo} referidos={referidos} />}
+      <MisFotos clienteId={perfil.id} />
       <MiPerfil
         nombreInicial={perfil.nombre ?? ""}
         telefonoInicial={datos?.telefono ?? ""}
