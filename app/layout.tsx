@@ -15,6 +15,8 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "La Fortaleza Barbería",
   description: "Mira qué tan lleno está, aparta tu cita y gana cortes gratis.",
+  appleWebApp: { capable: true, title: "La Fortaleza", statusBarStyle: "black-translucent" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {
