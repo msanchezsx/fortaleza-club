@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EnlaceCuenta } from "@/components/EnlaceCuenta";
 import { EnVivo } from "@/components/EnVivo";
 import { EstadoAbierto } from "@/components/EstadoAbierto";
@@ -23,6 +24,12 @@ export default function Inicio() {
       </section>
 
       <div className="mt-6 flex w-full flex-col gap-3">
+        <Link
+          href="/citas"
+          className="rounded-xl border border-oro/50 px-6 py-4 font-semibold text-oro transition hover:bg-oro/10"
+        >
+          Horarios para cita
+        </Link>
         <a
           href={mapsUrl}
           target="_blank"
