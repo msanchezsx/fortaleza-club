@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Cargando, Panel, Tarjeta } from "@/components/Panel";
+import { Estadisticas } from "@/components/Estadisticas";
+import { Cargando, Panel } from "@/components/Panel";
 import { exigirRol } from "@/lib/roles";
 
 export default function PaginaDueno() {
@@ -23,7 +24,7 @@ async function PanelDueno() {
         <p className="font-serif text-xl text-oro">Barberos</p>
         <p className="mt-1 text-sm text-crema/70">Dar de alta, desactivar y ver quién ya tiene cuenta.</p>
       </Link>
-      <Tarjeta>Aquí vas a ver las estadísticas de cortes (Paso 7).</Tarjeta>
+      <Estadisticas />
     </Panel>
   );
 }

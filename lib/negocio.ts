@@ -38,3 +38,20 @@ export function inicioDelDiaMexico(fecha = new Date()): string {
   const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(fecha);
   return `${ymd}T00:00:00-06:00`;
 }
+
+// Inicio de hoy, de esta semana (lunes), de este mes y de hace N días, en hora de México.
+export function periodosMexico(fecha = new Date(), dias = 14) {
+  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(fecha);
+  const hoy = new Date(`${ymd}T00:00:00Z`); // solo para contar días, sin zona
+  const aIso = (d: Date) => `${d.toISOString().slice(0, 10)}T00:00:00-06:00`;
+  const restar = (n: number) => new Date(hoy.getTime() - n * 86_400_000);
+  const diaSemana = (hoy.getUTCDay() + 6) % 7; // lunes = 0
+
+  return {
+    hoy: aIso(hoy),
+    semana: aIso(restar(diaSemana)),
+    mes: `${ymd.slice(0, 8)}01T00:00:00-06:00`,
+    desdeDias: aIso(restar(dias - 1)),
+    diaHoy: ymd,
+  };
+}
