@@ -1,0 +1,139 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { LogoCastillo } from "@/components/LogoCastillo";
+import { inicioDeRol, type Rol } from "@/lib/roles-cliente";
+import { crearClienteNavegador } from "@/lib/supabase/client";
+import { supabaseConfigurado } from "@/lib/supabase/config";
+
+type Modo = "entrar" | "registro";
+
+const ERRORES: Record<string, string> = {
+  "Invalid login credentials": "Correo o contraseña incorrectos.",
+  "User already registered": "Ese correo ya tiene cuenta. Usa \"Entrar\".",
+  "Email not confirmed": "Falta confirmar el correo. Revisa tu bandeja de entrada.",
+};
+
+export function FormularioLogin() {
+  const router = useRouter();
+  const siguiente = useSearchParams().get("siguiente");
+  const [modo, setModo] = useState<Modo>("entrar");
+  const [nombre, setNombre] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState(false);
+
+  async function enviar(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setAviso(null);
+    setEnviando(true);
+    const supabase = crearClienteNavegador();
+
+    const { data, error } =
+      modo === "entrar"
+        ? await supabase.auth.signInWithPassword({ email: correo, password: contrasena })
+        : await supabase.auth.signUp({
+            email: correo,
+            password: contrasena,
+            options: { data: { full_name: nombre } },
+          });
+
+    if (error) {
+      setError(ERRORES[error.message] ?? error.message);
+      setEnviando(false);
+      return;
+    }
+    if (!data.session) {
+      setAviso("Cuenta creada. Revisa tu correo para confirmarla y luego entra.");
+      setEnviando(false);
+      return;
+    }
+
+    const { data: perfil } = await supabase
+      .from("perfiles")
+      .select("rol")
+      .eq("id", data.session.user.id)
+      .single<{ rol: Rol }>();
+
+    router.replace(siguiente ?? inicioDeRol(perfil?.rol ?? "cliente"));
+    router.refresh();
+  }
+
+  return (
+    <div className="flex flex-col items-center text-center">
+      <Link href="/" className="text-oro">
+        <LogoCastillo className="h-16 w-16" />
+      </Link>
+      <h1 className="mt-4 font-serif text-3xl text-oro">{modo === "entrar" ? "Entrar" : "Crear cuenta"}</h1>
+
+      <div className="mt-6 grid w-full grid-cols-2 rounded-xl bg-carbon p-1">
+        {(["entrar", "registro"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setModo(m)}
+            className={`rounded-lg py-2 text-sm font-semibold transition ${
+              modo === m ? "bg-oro text-noche" : "text-crema/70"
+            }`}
+          >
+            {m === "entrar" ? "Entrar" : "Crear cuenta"}
+          </button>
+        ))}
+      </div>
+
+      {!supabaseConfigurado && (
+        <p className="mt-4 rounded-lg bg-ladrillo/30 p-3 text-sm">
+          Falta poner las llaves de Supabase en Vercel.
+        </p>
+      )}
+
+      <form onSubmit={enviar} className="mt-6 flex w-full flex-col gap-3 text-left">
+        {modo === "registro" && (
+          <Campo etiqueta="Nombre" value={nombre} onChange={setNombre} autoComplete="name" required />
+        )}
+        <Campo etiqueta="Correo" type="email" value={correo} onChange={setCorreo} autoComplete="email" required />
+        <Campo
+          etiqueta="Contraseña"
+          type="password"
+          value={contrasena}
+          onChange={setContrasena}
+          autoComplete={modo === "entrar" ? "current-password" : "new-password"}
+          minLength={6}
+          required
+        />
+
+        {error && <p className="rounded-lg bg-ladrillo/30 p-3 text-sm">{error}</p>}
+        {aviso && <p className="rounded-lg bg-emerald-900/50 p-3 text-sm text-emerald-200">{aviso}</p>}
+
+        <button
+          disabled={enviando || !supabaseConfigurado}
+          className="mt-2 rounded-xl bg-oro px-6 py-4 font-semibold text-noche transition hover:bg-oro-claro disabled:opacity-50"
+        >
+          {enviando ? "Un momento…" : modo === "entrar" ? "Entrar" : "Crear cuenta"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function Campo({
+  etiqueta,
+  onChange,
+  ...props
+}: { etiqueta: string; onChange: (v: string) => void } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange">) {
+  return (
+    <label className="flex flex-col gap-1 text-sm text-crema/70">
+      {etiqueta}
+      <input
+        {...props}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-xl border border-crema/15 bg-carbon px-4 py-3 text-base text-crema outline-none focus:border-oro"
+      />
+    </label>
+  );
+}
