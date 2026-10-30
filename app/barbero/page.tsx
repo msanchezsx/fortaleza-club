@@ -51,6 +51,7 @@ async function PanelBarbero() {
         estadoInicial={barbero.estado_barbero?.estado ?? "libre"}
         desdeInicial={barbero.estado_barbero?.desde ?? null}
         cortesHoyInicial={count ?? 0}
+        citas={(citas ?? []) as CitaBarbero[]}
       />
       <CitasBarbero citas={(citas ?? []) as CitaBarbero[]} />
       <Link
