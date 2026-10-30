@@ -6,13 +6,12 @@ export const NEGOCIO = {
   horario: "Todos los días de 11:00 am a 9:00 pm",
   abre: 11,
   cierra: 21,
-  // TODO: poner el número real de WhatsApp (10 dígitos, con 52 al inicio)
-  whatsapp: "5200000000000",
+  // WhatsApp: 52 (México) + 10 dígitos
+  whatsapp: "525572763587",
+  maps: "https://maps.app.goo.gl/u2SYuPBwMKk1z8waA",
 };
 
-export const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-  `La Fortaleza Barbería, ${NEGOCIO.direccion}`,
-)}`;
+export const mapsUrl = NEGOCIO.maps;
 
 export const whatsappUrl = `https://wa.me/${NEGOCIO.whatsapp}?text=${encodeURIComponent(
   "Hola, quiero información de La Fortaleza Barbería",
