@@ -13,6 +13,8 @@ const ERRORES: Record<string, string> = {
   "Invalid login credentials": "Correo o contraseña incorrectos.",
   "User already registered": "Ese correo ya tiene cuenta. Usa \"Entrar\".",
   "Email not confirmed": "Falta confirmar el correo. Revisa tu bandeja de entrada.",
+  "Email logins are disabled": "El inicio con correo está apagado en Supabase (Sign In / Providers > Email).",
+  "Password should be at least 6 characters.": "La contraseña debe tener al menos 6 caracteres.",
 };
 
 export function FormularioLogin() {
