@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_KEY, SUPABASE_URL, supabaseConfigurado } from "@/lib/supabase/config";
 
-// Mantiene viva la sesión y protege los paneles del dueño y del barbero.
+// Mantiene viva la sesión y protege los paneles (dueño, barbero y cuenta del cliente).
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   if (!supabaseConfigurado) return response;
@@ -24,7 +24,7 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const conSesion = Boolean(data?.claims);
   const ruta = request.nextUrl.pathname;
-  const protegida = ruta.startsWith("/dueno") || ruta.startsWith("/barbero");
+  const protegida = ["/dueno", "/barbero", "/cuenta"].some((p) => ruta.startsWith(p));
 
   if (protegida && !conSesion) {
     const url = request.nextUrl.clone();
