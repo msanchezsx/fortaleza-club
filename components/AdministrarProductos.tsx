@@ -3,18 +3,29 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { comprimirFoto } from "@/lib/comprimir";
-import { precioBonito, type Producto } from "@/lib/productos";
+import {
+  porcentajeDescuento,
+  precioBonito,
+  type Producto,
+} from "@/lib/productos";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 
 type ProductoDueno = Producto & { fotoUrl: string | null };
 
-const campo = "rounded-xl border border-crema/15 bg-noche px-4 py-3 text-crema outline-none focus:border-oro";
+const campo =
+  "rounded-xl border border-crema/15 bg-noche px-4 py-3 text-crema outline-none focus:border-oro";
 
 // El dueño agrega productos con foto y precio, y los oculta o borra.
-export function AdministrarProductos({ productos }: { productos: ProductoDueno[] }) {
+export function AdministrarProductos({
+  productos,
+}: {
+  productos: ProductoDueno[];
+}) {
   const router = useRouter();
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
+  const [precioAntes, setPrecioAntes] = useState("");
+  const [alFinal, setAlFinal] = useState(false);
   const [descripcion, setDescripcion] = useState("");
   const [foto, setFoto] = useState<File | null>(null);
   const [guardando, setGuardando] = useState(false);
@@ -24,6 +35,10 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
   async function agregar(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (precioAntes && Number(precioAntes) <= Number(precio)) {
+      setError("El precio de antes debe ser mayor que el precio actual.");
+      return;
+    }
     setGuardando(true);
     const supabase = crearClienteNavegador();
     try {
@@ -32,18 +47,24 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
         ruta = `${Date.now()}.jpg`;
         const { error } = await supabase.storage
           .from("productos")
-          .upload(ruta, await comprimirFoto(foto), { contentType: "image/jpeg" });
+          .upload(ruta, await comprimirFoto(foto), {
+            contentType: "image/jpeg",
+          });
         if (error) throw new Error(error.message);
       }
       const { error } = await supabase.from("productos").insert({
         nombre: nombre.trim(),
         precio: Number(precio),
+        precio_antes: precioAntes ? Number(precioAntes) : null,
+        orden: alFinal ? 1000 : 0,
         descripcion: descripcion.trim() || null,
         foto: ruta,
       });
       if (error) throw new Error(error.message);
       setNombre("");
       setPrecio("");
+      setPrecioAntes("");
+      setAlFinal(false);
       setDescripcion("");
       setFoto(null);
       if (entrada.current) entrada.current.value = "";
@@ -56,26 +77,34 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
   }
 
   async function cambiarActivo(p: ProductoDueno) {
-    const { error } = await crearClienteNavegador().from("productos").update({ activo: !p.activo }).eq("id", p.id);
+    const { error } = await crearClienteNavegador()
+      .from("productos")
+      .update({ activo: !p.activo })
+      .eq("id", p.id);
     if (error) setError(error.message);
     router.refresh();
   }
 
   async function borrar(p: ProductoDueno) {
-    if (!confirm(`¿Borrar ${p.nombre}? También se borran sus apartados.`)) return;
+    if (!confirm(`¿Borrar ${p.nombre}? También se borran sus apartados.`))
+      return;
     const supabase = crearClienteNavegador();
     const { error } = await supabase.from("productos").delete().eq("id", p.id);
     if (error) {
       setError(error.message);
       return;
     }
-    if (p.foto) await supabase.storage.from("productos").remove([p.foto]);
+    if (p.foto && !p.foto.startsWith("/"))
+      await supabase.storage.from("productos").remove([p.foto]);
     router.refresh();
   }
 
   return (
     <>
-      <form onSubmit={agregar} className="flex flex-col gap-3 rounded-2xl border border-oro/20 bg-carbon p-5">
+      <form
+        onSubmit={agregar}
+        className="flex flex-col gap-3 rounded-2xl border border-oro/20 bg-carbon p-5"
+      >
         <p className="font-serif text-xl text-oro">Agregar producto</p>
         <input
           value={nombre}
@@ -93,6 +122,16 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
           min="0"
           step="0.5"
           required
+          className={campo}
+        />
+        <input
+          value={precioAntes}
+          onChange={(e) => setPrecioAntes(e.target.value)}
+          placeholder="Precio antes, para mostrar descuento (opcional)"
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="0.5"
           className={campo}
         />
         <textarea
@@ -116,7 +155,18 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
         >
           📷 {foto ? `Foto: ${foto.name}` : "Elegir foto (opcional)"}
         </button>
-        {error && <p className="rounded-lg bg-ladrillo/30 p-3 text-sm">{error}</p>}
+        <label className="flex items-center gap-3 text-sm text-crema/80">
+          <input
+            type="checkbox"
+            checked={alFinal}
+            onChange={(e) => setAlFinal(e.target.checked)}
+            className="h-5 w-5 accent-oro"
+          />
+          Mostrar siempre al final (por ejemplo, un curso)
+        </label>
+        {error && (
+          <p className="rounded-lg bg-ladrillo/30 p-3 text-sm">{error}</p>
+        )}
         <button
           disabled={guardando}
           className="rounded-xl bg-oro px-6 py-3 font-semibold text-noche transition hover:bg-oro-claro disabled:opacity-50"
@@ -126,7 +176,9 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
       </form>
 
       {productos.length === 0 ? (
-        <p className="text-center text-sm text-crema/50">Todavía no hay productos.</p>
+        <p className="text-center text-sm text-crema/50">
+          Todavía no hay productos.
+        </p>
       ) : (
         <ul className="flex flex-col gap-3">
           {productos.map((p) => (
@@ -136,7 +188,11 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
             >
               {p.fotoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element -- foto pública de Supabase
-                <img src={p.fotoUrl} alt="" className="h-16 w-16 rounded-lg object-cover" />
+                <img
+                  src={p.fotoUrl}
+                  alt=""
+                  className="h-16 w-16 rounded-lg object-cover"
+                />
               ) : (
                 <span className="h-16 w-16 rounded-lg bg-noche" />
               )}
@@ -144,6 +200,7 @@ export function AdministrarProductos({ productos }: { productos: ProductoDueno[]
                 <p className="truncate text-crema">{p.nombre}</p>
                 <p className="text-sm text-crema/60">
                   {precioBonito(p.precio)}
+                  {porcentajeDescuento(p) && ` · -${porcentajeDescuento(p)}%`}
                   {!p.activo && " · Oculto"}
                 </p>
               </div>

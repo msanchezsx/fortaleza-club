@@ -1,28 +1,22 @@
-import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Catalogo } from "@/components/Catalogo";
-import { LogoCastillo } from "@/components/LogoCastillo";
+import { FeedProductos } from "@/components/FeedProductos";
 import { Cargando } from "@/components/Panel";
-import type { Apartado, Producto } from "@/lib/productos";
+import {
+  COLUMNAS_PRODUCTO,
+  urlFoto,
+  type Apartado,
+  type Producto,
+} from "@/lib/productos";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 import { crearClienteServidor } from "@/lib/supabase/server";
 
+// Productos a pantalla completa: se deslizan hacia arriba como videos.
 export default function PaginaProductos() {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 py-6">
-      <header>
-        <Link href="/" className="flex items-center gap-2 text-oro">
-          <LogoCastillo className="h-8 w-8" />
-          <span className="font-serif text-lg">La Fortaleza</span>
-        </Link>
-      </header>
-      <h1 className="mt-8 font-serif text-3xl text-oro">Productos</h1>
-      <p className="mt-1 text-crema/70">Apártalo aquí y págalo cuando pases a la barbería.</p>
-      <Suspense fallback={<Cargando />}>
-        <ListaProductos />
-      </Suspense>
-    </main>
+    <Suspense fallback={<Cargando />}>
+      <ListaProductos />
+    </Suspense>
   );
 }
 
@@ -33,9 +27,10 @@ async function ListaProductos() {
   const [{ data: productos }, { data: claims }] = await Promise.all([
     supabase
       .from("productos")
-      .select("id, nombre, descripcion, precio, foto, activo")
+      .select(COLUMNAS_PRODUCTO)
       .eq("activo", true)
-      .order("nombre"),
+      .order("orden")
+      .order("id"),
     supabase.auth.getClaims(),
   ]);
   const usuario = claims?.claims.sub;
@@ -51,11 +46,15 @@ async function ListaProductos() {
 
   const lista = ((productos ?? []) as Producto[]).map((p) => ({
     ...p,
-    foto: p.foto ? supabase.storage.from("productos").getPublicUrl(p.foto).data.publicUrl : null,
+    foto: urlFoto(
+      p.foto,
+      (ruta) =>
+        supabase.storage.from("productos").getPublicUrl(ruta).data.publicUrl,
+    ),
   }));
 
   return (
-    <Catalogo
+    <FeedProductos
       productos={lista}
       apartados={(apartados ?? []) as unknown as Apartado[]}
       conSesion={Boolean(usuario)}
