@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Estadisticas } from "@/components/Estadisticas";
+import { MejoresHorarios } from "@/components/MejoresHorarios";
 import { Cargando, Panel } from "@/components/Panel";
 import { exigirRol } from "@/lib/roles";
 
@@ -32,6 +33,7 @@ async function PanelDueno() {
         <p className="mt-1 text-sm text-crema/70">Cuántos cortes dan uno gratis y el descuento por invitar.</p>
       </Link>
       <Estadisticas />
+      <MejoresHorarios />
     </Panel>
   );
 }
