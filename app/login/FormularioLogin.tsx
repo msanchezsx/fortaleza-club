@@ -18,8 +18,11 @@ const ERRORES: Record<string, string> = {
 };
 
 export function FormularioLogin() {
-  const siguiente = useSearchParams().get("siguiente");
-  const [modo, setModo] = useState<Modo>("entrar");
+  const parametros = useSearchParams();
+  const siguiente = parametros.get("siguiente");
+  const invita = parametros.get("invita")?.replace(/\D/g, "").slice(0, 4) ?? "";
+  const [modo, setModo] = useState<Modo>(invita ? "registro" : "entrar");
+  const [codigoInvita, setCodigoInvita] = useState(invita);
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -51,6 +54,11 @@ export function FormularioLogin() {
       if (!data.session) {
         setAviso("Cuenta creada. Revisa tu correo para confirmarla y luego entra.");
         return;
+      }
+
+      // Si lo invitó un amigo, registrar la invitación (si falla, puede intentarlo en Mi cuenta).
+      if (modo === "registro" && codigoInvita.length === 4) {
+        await supabase.rpc("usar_invitacion", { p_codigo: codigoInvita });
       }
 
       // Recarga completa: el servidor lee la sesión nueva y manda a cada quien a su página.
@@ -95,6 +103,15 @@ export function FormularioLogin() {
       <form onSubmit={enviar} className="mt-6 flex w-full flex-col gap-3 text-left">
         {modo === "registro" && (
           <Campo etiqueta="Nombre" value={nombre} onChange={setNombre} autoComplete="name" required />
+        )}
+        {modo === "registro" && (
+          <Campo
+            etiqueta="Código de quien te invitó (opcional)"
+            value={codigoInvita}
+            onChange={(v) => setCodigoInvita(v.replace(/\D/g, "").slice(0, 4))}
+            inputMode="numeric"
+            placeholder="0000"
+          />
         )}
         <Campo etiqueta="Correo" type="email" value={correo} onChange={setCorreo} autoComplete="email" required />
         <Campo

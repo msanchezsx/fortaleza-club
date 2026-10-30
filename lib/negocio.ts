@@ -9,6 +9,8 @@ export const NEGOCIO = {
   // WhatsApp: 52 (México) + 10 dígitos
   whatsapp: "525572763587",
   maps: "https://maps.app.goo.gl/u2SYuPBwMKk1z8waA",
+  // Dirección pública de la app (para los enlaces de invitación)
+  sitio: "https://fortaleza-club.vercel.app",
 };
 
 export const mapsUrl = NEGOCIO.maps;

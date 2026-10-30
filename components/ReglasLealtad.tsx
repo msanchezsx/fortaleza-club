@@ -5,7 +5,19 @@ import { useState } from "react";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 
 // El dueño decide cuántos cortes dan uno gratis, o pausa el programa.
-export function ReglasLealtad({ cortesInicial, activoInicial }: { cortesInicial: number; activoInicial: boolean }) {
+export function ReglasLealtad({
+  cortesInicial,
+  activoInicial,
+  descuentoInicial,
+  referidosInicial,
+}: {
+  cortesInicial: number;
+  activoInicial: boolean;
+  descuentoInicial: string;
+  referidosInicial: boolean;
+}) {
+  const [descuento, setDescuento] = useState(descuentoInicial);
+  const [referidos, setReferidos] = useState(referidosInicial);
   const router = useRouter();
   const [cortes, setCortes] = useState(cortesInicial);
   const [activo, setActivo] = useState(activoInicial);
@@ -17,7 +29,7 @@ export function ReglasLealtad({ cortesInicial, activoInicial }: { cortesInicial:
     setMensaje(null);
     const { error } = await crearClienteNavegador()
       .from("reglas_lealtad")
-      .update({ cortes_para_gratis: cortes, activo })
+      .update({ cortes_para_gratis: cortes, activo, descuento_referido: descuento.trim() || descuentoInicial, referidos_activo: referidos })
       .eq("id", 1);
     setGuardando(false);
     setMensaje(error ? { ok: false, texto: error.message } : { ok: true, texto: "Listo, la regla ya aplica para todos." });
@@ -58,6 +70,29 @@ export function ReglasLealtad({ cortesInicial, activoInicial }: { cortesInicial:
         </span>
         <input type="checkbox" checked={activo} onChange={(e) => setActivo(e.target.checked)} className="h-6 w-6 accent-oro" />
       </label>
+
+      <div className="flex flex-col gap-3 border-t border-crema/10 pt-5">
+        <p className="font-serif text-xl text-oro">Invita a un amigo</p>
+        <label className="flex flex-col gap-1 text-sm text-crema/70">
+          Qué gana cada uno (el amigo y quien lo invitó)
+          <input
+            value={descuento}
+            onChange={(e) => setDescuento(e.target.value)}
+            maxLength={60}
+            placeholder="$30 de descuento"
+            className="rounded-xl border border-crema/15 bg-noche px-4 py-3 text-crema outline-none focus:border-oro"
+          />
+        </label>
+        <label className="flex items-center justify-between gap-4 rounded-xl bg-noche/60 px-4 py-3">
+          <span className="text-crema">Invitaciones activas</span>
+          <input
+            type="checkbox"
+            checked={referidos}
+            onChange={(e) => setReferidos(e.target.checked)}
+            className="h-6 w-6 accent-oro"
+          />
+        </label>
+      </div>
 
       {mensaje && (
         <p className={`rounded-lg p-3 text-sm ${mensaje.ok ? "bg-emerald-500/15 text-emerald-300" : "bg-ladrillo/30"}`}>

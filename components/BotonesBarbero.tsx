@@ -51,18 +51,19 @@ export function BotonesBarbero({
     }
   }
 
-  const terminarCorte = (codigo: string | null, gratis: boolean) =>
+  const terminarCorte = (codigo: string | null, gratis: boolean, descuento = false) =>
     ejecutar(async () => {
       const { error } = await crearClienteNavegador().rpc("registrar_corte", {
         p_inicio: estado === "atendiendo" ? desde : null,
         p_codigo: codigo,
         p_gratis: gratis,
+        p_descuento: descuento,
       });
       if (error) throw error;
       setCortesHoy((n) => n + 1);
       setPreguntando(false);
       await cambiarEstado("libre");
-      setAviso(gratis ? "✓ Corte gratis registrado" : codigo ? "✓ Corte registrado en su tarjeta" : "✓ Corte registrado");
+      setAviso(gratis ? "✓ Corte gratis registrado" : descuento ? "✓ Corte con descuento registrado" : codigo ? "✓ Corte registrado en su tarjeta" : "✓ Corte registrado");
     });
 
   const atendiendo = estado === "atendiendo";
@@ -128,7 +129,15 @@ export function BotonesBarbero({
   );
 }
 
-type Cliente = { nombre: string | null; regla: number; activo: boolean; disponibles: number; progreso: number };
+type Cliente = {
+  nombre: string | null;
+  regla: number;
+  activo: boolean;
+  disponibles: number;
+  progreso: number;
+  descuentos: number;
+  descuento: string;
+};
 
 // Después de "Corte terminado": el barbero escribe el código del cliente (o lo guarda sin cliente).
 function ParaQuien({
@@ -139,7 +148,7 @@ function ParaQuien({
 }: {
   citas: { inicio: string; cliente: string | null; codigo: string | null }[];
   guardando: boolean;
-  onGuardar: (codigo: string | null, gratis: boolean) => void;
+  onGuardar: (codigo: string | null, gratis: boolean, descuento?: boolean) => void;
   onVolver: () => void;
 }) {
   const [codigo, setCodigo] = useState("");
@@ -198,6 +207,9 @@ function ParaQuien({
             (encontrado.disponibles > 0
               ? ` · ¡Tiene ${encontrado.disponibles} corte${encontrado.disponibles > 1 ? "s" : ""} gratis!`
               : ` · Lleva ${encontrado.progreso} de ${encontrado.regla}`)}
+          {encontrado.descuentos > 0 && (
+            <span className="block text-emerald-300">Tiene {encontrado.descuento} por invitación.</span>
+          )}
         </p>
       )}
 
@@ -217,6 +229,15 @@ function ParaQuien({
               className="rounded-xl border border-emerald-400/60 py-3 font-semibold text-emerald-300 disabled:opacity-50"
             >
               🎁 Este fue su corte gratis
+            </button>
+          )}
+          {encontrado.descuentos > 0 && (
+            <button
+              onClick={() => onGuardar(codigo, false, true)}
+              disabled={guardando}
+              className="rounded-xl border border-emerald-400/60 py-3 font-semibold text-emerald-300 disabled:opacity-50"
+            >
+              💸 Aplicar {encontrado.descuento}
             </button>
           )}
         </>

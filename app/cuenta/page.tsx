@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { InvitarAmigos, type Referidos } from "@/components/InvitarAmigos";
 import { MiCita } from "@/components/MiCita";
 import { MiPerfil } from "@/components/MiPerfil";
 import { Cargando, Panel } from "@/components/Panel";
@@ -22,7 +23,7 @@ async function Cuenta() {
   const perfil = await exigirRol(["cliente", "barbero", "dueno"], "/cuenta");
   const supabase = await crearClienteServidor();
 
-  const [{ data: datos }, { data: barberos }, { data: lealtad }, { data: citas }] = await Promise.all([
+  const [{ data: datos }, { data: barberos }, { data: lealtad }, { data: citas }, { data: refs }] = await Promise.all([
     supabase
       .from("perfiles")
       .select("telefono, barbero_favorito")
@@ -35,9 +36,11 @@ async function Cuenta() {
       .select("id, horarios_cita!inner (inicio, barberos (nombre))")
       .eq("cliente_id", perfil.id)
       .gt("horarios_cita.inicio", new Date().toISOString()),
+    supabase.rpc("mis_referidos"),
   ]);
   const cita = ((citas ?? []) as unknown as CitaFila[])[0];
   const tarjeta = ((lealtad ?? []) as Lealtad[])[0];
+  const referidos = ((refs ?? []) as Referidos[])[0];
 
   return (
     <Panel titulo="Mi cuenta" nombre={perfil.nombre}>
@@ -58,6 +61,7 @@ async function Cuenta() {
         </Link>
       )}
       {tarjeta && <TarjetaLealtad lealtad={tarjeta} />}
+      {tarjeta && referidos && <InvitarAmigos codigo={tarjeta.codigo} referidos={referidos} />}
       <MiPerfil
         nombreInicial={perfil.nombre ?? ""}
         telefonoInicial={datos?.telefono ?? ""}
