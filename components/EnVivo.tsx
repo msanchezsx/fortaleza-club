@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { estimarLiberacion, textoLiberacion } from "@/lib/estimado";
+import { CuentaRegresiva } from "@/components/CuentaRegresiva";
 import { estaAbierto } from "@/lib/negocio";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 import { supabaseConfigurado } from "@/lib/supabase/config";
@@ -15,7 +15,6 @@ export function EnVivo() {
   const [barberos, setBarberos] = useState<Barbero[] | null>(null);
   const [abierto, setAbierto] = useState(true);
   const [duracion, setDuracion] = useState(35);
-  const [ahora, setAhora] = useState(0);
 
   useEffect(() => {
     if (!supabaseConfigurado) return;
@@ -41,12 +40,9 @@ export function EnVivo() {
     }
 
     cargar();
-    const revisarHorario = () => {
-      setAbierto(estaAbierto());
-      setAhora(Date.now());
-    };
+    const revisarHorario = () => setAbierto(estaAbierto());
     revisarHorario();
-    const reloj = setInterval(revisarHorario, 30_000);
+    const reloj = setInterval(revisarHorario, 60_000);
 
     // Cuando un barbero cambia su estado, se actualiza aquí sin recargar.
     const canal = supabase
@@ -60,7 +56,6 @@ export function EnVivo() {
               b.id === nuevo.barbero_id ? { ...b, estado: nuevo.estado!, desde: nuevo.desde ?? b.desde } : b,
             ) ?? lista,
         );
-        setAhora(Date.now());
       })
       .subscribe();
 
@@ -82,7 +77,6 @@ export function EnVivo() {
 
   const libres = barberos.filter((b) => b.estado === "libre").length;
   const ocupados = barberos.filter((b) => b.estado === "atendiendo").map((b) => b.desde);
-  const proximo = ahora && libres < barberos.length ? estimarLiberacion(ocupados, duracion, ahora) : null;
   const ocupacion = 1 - libres / barberos.length;
   const nivel =
     !abierto ? null : libres === 0 ? "Lleno, hay espera" : ocupacion >= 0.6 ? "Algo lleno" : "Tranquilo, sin espera";
@@ -106,11 +100,7 @@ export function EnVivo() {
             />
           </div>
           <p className="mt-2 text-sm text-crema/80">{nivel}</p>
-          {proximo && libres <= 1 && (
-            <p className="mt-2 rounded-lg bg-oro/10 px-3 py-2 text-sm text-oro-claro">
-              ⏱ {textoLiberacion(proximo)}
-            </p>
-          )}
+          {libres <= 1 && <CuentaRegresiva inicios={ocupados} duracionMin={duracion} />}
         </>
       )}
 
