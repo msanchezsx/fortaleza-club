@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { CitasBarbero, type CitaBarbero } from "@/components/CitasBarbero";
 import { BotonesBarbero, type Estado } from "@/components/BotonesBarbero";
 import { Cargando, Panel, Tarjeta } from "@/components/Panel";
 import { inicioDelDiaMexico } from "@/lib/negocio";
@@ -36,6 +37,7 @@ async function PanelBarbero() {
     );
   }
 
+  const { data: citas } = await supabase.rpc("mis_citas_barbero");
   const { count } = await supabase
     .from("cortes")
     .select("id", { count: "exact", head: true })
@@ -50,6 +52,7 @@ async function PanelBarbero() {
         desdeInicial={barbero.estado_barbero?.desde ?? null}
         cortesHoyInicial={count ?? 0}
       />
+      <CitasBarbero citas={(citas ?? []) as CitaBarbero[]} />
       <Link
         href="/barbero/horarios"
         className="rounded-2xl border border-oro/40 bg-carbon p-5 transition hover:bg-oro/10"

@@ -31,6 +31,7 @@ async function Horarios() {
     );
   }
 
+  const { data: citas } = await supabase.rpc("mis_citas_barbero");
   const { data: horarios } = await supabase
     .from("horarios_cita")
     .select("inicio")
@@ -43,7 +44,11 @@ async function Horarios() {
       <Link href="/barbero" className="text-sm text-oro/80 underline-offset-4 hover:underline">
         ← Volver a mi panel
       </Link>
-      <AbrirHorarios barberoId={barbero.id} abiertos={(horarios ?? []).map((h) => h.inicio as string)} />
+      <AbrirHorarios
+        barberoId={barbero.id}
+        abiertos={(horarios ?? []).map((h) => h.inicio as string)}
+        apartados={((citas ?? []) as { inicio: string }[]).map((c) => c.inicio)}
+      />
     </Panel>
   );
 }

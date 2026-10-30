@@ -42,3 +42,9 @@ export function horaBonita(iso: string): string {
 export function diaMexico(iso: string): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(new Date(iso));
 }
+
+// Instante -> "Hoy", "Mañana" o "sáb 31".
+export function etiquetaDia(iso: string): string {
+  const dia = diaMexico(iso);
+  return proximosDias(14).find((d) => d.ymd === dia)?.etiqueta ?? dia;
+}
