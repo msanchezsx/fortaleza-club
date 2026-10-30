@@ -166,6 +166,8 @@ function ParaQuien({
     setCodigo(limpio);
     setCliente(null);
     if (limpio.length !== 4) return;
+    // Con los 4 dígitos, quitar el teclado para que se vea el resultado.
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     const { data } = await crearClienteNavegador().rpc("buscar_cliente", { p_codigo: limpio });
     const fila = (data as Cliente[] | null)?.[0];
     setCliente(fila ?? "no-existe");
@@ -199,18 +201,31 @@ function ParaQuien({
         />
       </label>
 
-      {cliente === "no-existe" && <p className="text-sm text-ladrillo">No hay ningún cliente con ese código.</p>}
+      {cliente === "no-existe" && (
+        <p className="rounded-xl bg-ladrillo/30 p-4 text-center font-semibold">No hay ningún cliente con ese código.</p>
+      )}
       {encontrado && (
-        <p className="rounded-lg bg-noche/60 p-3 text-sm text-crema/80">
-          <b className="text-crema">{encontrado.nombre ?? "Cliente"}</b>
-          {encontrado.activo &&
-            (encontrado.disponibles > 0
-              ? ` · ¡Tiene ${encontrado.disponibles} corte${encontrado.disponibles > 1 ? "s" : ""} gratis!`
-              : ` · Lleva ${encontrado.progreso} de ${encontrado.regla}`)}
-          {encontrado.descuentos > 0 && (
-            <span className="block text-emerald-300">Tiene {encontrado.descuento} por invitación.</span>
+        <div className="flex flex-col gap-2 rounded-xl bg-noche/60 p-4 text-center">
+          <p className="font-serif text-2xl text-crema">{encontrado.nombre ?? "Cliente"}</p>
+          {encontrado.activo && encontrado.disponibles > 0 && (
+            <p className="rounded-lg bg-emerald-400/20 p-3 text-lg font-bold text-emerald-300">
+              🎁 ¡Tiene {encontrado.disponibles === 1 ? "un corte" : `${encontrado.disponibles} cortes`} gratis!
+            </p>
           )}
-        </p>
+          {encontrado.descuentos > 0 && (
+            <p className="rounded-lg bg-emerald-400/20 p-3 text-lg font-bold text-emerald-300">
+              💸 Tiene {encontrado.descuento} por invitación
+            </p>
+          )}
+          {encontrado.activo && encontrado.disponibles === 0 && (
+            <p className="text-sm text-crema/70">
+              Lleva {encontrado.progreso} de {encontrado.regla} para su corte gratis
+            </p>
+          )}
+          {!(encontrado.activo && encontrado.disponibles > 0) && encontrado.descuentos === 0 && (
+            <p className="text-sm text-crema/60">Sin corte gratis ni descuento por ahora.</p>
+          )}
+        </div>
       )}
 
       {encontrado ? (
