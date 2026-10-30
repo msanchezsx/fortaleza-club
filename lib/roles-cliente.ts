@@ -4,5 +4,5 @@ export type Rol = "dueno" | "barbero" | "cliente";
 export function inicioDeRol(rol: Rol): string {
   if (rol === "dueno") return "/dueno";
   if (rol === "barbero") return "/barbero";
-  return "/";
+  return "/cuenta";
 }
