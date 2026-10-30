@@ -32,3 +32,9 @@ export function estaAbierto(fecha = new Date()): boolean {
   const hora = horaMexico(fecha);
   return hora >= NEGOCIO.abre && hora < NEGOCIO.cierra;
 }
+
+// Inicio del día de hoy en Ciudad de México (UTC-6 todo el año desde 2022), en formato ISO.
+export function inicioDelDiaMexico(fecha = new Date()): string {
+  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(fecha);
+  return `${ymd}T00:00:00-06:00`;
+}
