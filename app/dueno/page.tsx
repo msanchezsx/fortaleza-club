@@ -24,6 +24,13 @@ async function PanelDueno() {
         <p className="font-serif text-xl text-oro">Barberos</p>
         <p className="mt-1 text-sm text-crema/70">Dar de alta, desactivar y ver quién ya tiene cuenta.</p>
       </Link>
+      <Link
+        href="/dueno/lealtad"
+        className="rounded-2xl border border-oro/40 bg-carbon p-5 transition hover:bg-oro/10"
+      >
+        <p className="font-serif text-xl text-oro">Lealtad</p>
+        <p className="mt-1 text-sm text-crema/70">Cuántos cortes dan uno gratis.</p>
+      </Link>
       <Estadisticas />
     </Panel>
   );

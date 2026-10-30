@@ -1,6 +1,6 @@
 import { etiquetaDia, horaBonita } from "@/lib/citas";
 
-export type CitaBarbero = { cita_id: number; horario_id: number; inicio: string; cliente: string | null; telefono: string | null };
+export type CitaBarbero = { cita_id: number; horario_id: number; inicio: string; cliente: string | null; telefono: string | null; codigo: string | null };
 
 // Próximas citas del barbero, con WhatsApp del cliente si lo dejó.
 export function CitasBarbero({ citas }: { citas: CitaBarbero[] }) {
