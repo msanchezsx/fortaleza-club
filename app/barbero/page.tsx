@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { BotonesBarbero, type Estado } from "@/components/BotonesBarbero";
 import { Cargando, Panel, Tarjeta } from "@/components/Panel";
@@ -49,6 +50,13 @@ async function PanelBarbero() {
         desdeInicial={barbero.estado_barbero?.desde ?? null}
         cortesHoyInicial={count ?? 0}
       />
+      <Link
+        href="/barbero/horarios"
+        className="rounded-2xl border border-oro/40 bg-carbon p-5 transition hover:bg-oro/10"
+      >
+        <p className="font-serif text-xl text-oro">Horarios para cita</p>
+        <p className="mt-1 text-sm text-crema/70">Abre las horas tranquilas en que aceptas cita.</p>
+      </Link>
     </Panel>
   );
 }
