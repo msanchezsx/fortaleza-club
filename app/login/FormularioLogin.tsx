@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { LogoCastillo } from "@/components/LogoCastillo";
-import { inicioDeRol, type Rol } from "@/lib/roles-cliente";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 
@@ -19,7 +18,6 @@ const ERRORES: Record<string, string> = {
 };
 
 export function FormularioLogin() {
-  const router = useRouter();
   const siguiente = useSearchParams().get("siguiente");
   const [modo, setModo] = useState<Modo>("entrar");
   const [nombre, setNombre] = useState("");
@@ -34,36 +32,36 @@ export function FormularioLogin() {
     setError(null);
     setAviso(null);
     setEnviando(true);
-    const supabase = crearClienteNavegador();
 
-    const { data, error } =
-      modo === "entrar"
-        ? await supabase.auth.signInWithPassword({ email: correo, password: contrasena })
-        : await supabase.auth.signUp({
-            email: correo,
-            password: contrasena,
-            options: { data: { full_name: nombre } },
-          });
+    try {
+      const supabase = crearClienteNavegador();
+      const { data, error } =
+        modo === "entrar"
+          ? await supabase.auth.signInWithPassword({ email: correo, password: contrasena })
+          : await supabase.auth.signUp({
+              email: correo,
+              password: contrasena,
+              options: { data: { full_name: nombre } },
+            });
 
-    if (error) {
-      setError(ERRORES[error.message] ?? error.message);
+      if (error) {
+        setError(ERRORES[error.message] ?? error.message);
+        return;
+      }
+      if (!data.session) {
+        setAviso("Cuenta creada. Revisa tu correo para confirmarla y luego entra.");
+        return;
+      }
+
+      // Recarga completa: el servidor lee la sesión nueva y manda a cada quien a su página.
+      const destino = siguiente ? `?siguiente=${encodeURIComponent(siguiente)}` : "";
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- /entrar es una ruta del servidor y queremos recarga completa
+      window.location.assign(`/entrar${destino}`);
+    } catch (e) {
+      setError(`No se pudo conectar: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
       setEnviando(false);
-      return;
     }
-    if (!data.session) {
-      setAviso("Cuenta creada. Revisa tu correo para confirmarla y luego entra.");
-      setEnviando(false);
-      return;
-    }
-
-    const { data: perfil } = await supabase
-      .from("perfiles")
-      .select("rol")
-      .eq("id", data.session.user.id)
-      .single<{ rol: Rol }>();
-
-    router.replace(siguiente ?? inicioDeRol(perfil?.rol ?? "cliente"));
-    router.refresh();
   }
 
   return (
