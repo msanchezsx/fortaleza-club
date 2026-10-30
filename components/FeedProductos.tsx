@@ -1,74 +1,40 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { CarritoHoja } from "@/components/CarritoHoja";
+import { useCarrito } from "@/lib/carrito";
 import { NEGOCIO } from "@/lib/negocio";
 import {
+  ES_DESTACADO,
   porcentajeDescuento,
   precioBonito,
-  type Apartado,
+  type Pedido,
   type Producto,
 } from "@/lib/productos";
-import { crearClienteNavegador } from "@/lib/supabase/client";
-
-// Los productos con orden alto (como el curso) van al final y no piden cantidad.
-const ES_DESTACADO = (p: Producto) => p.orden >= 1000;
 
 // Productos a pantalla completa que se deslizan hacia arriba, estilo TikTok.
+// Se agregan al carrito y se paga en efectivo en la sucursal o por transferencia.
 export function FeedProductos({
   productos,
-  apartados,
-  conSesion,
+  pedidos,
+  clienteId,
 }: {
   productos: Producto[];
-  apartados: Apartado[];
-  conSesion: boolean;
+  pedidos: Pedido[];
+  clienteId: string | null;
 }) {
-  const router = useRouter();
+  const { carrito, piezas, agregar } = useCarrito();
   const [cantidades, setCantidades] = useState<Record<number, number>>({});
-  const [ocupado, setOcupado] = useState<number | null>(null);
-  const [mensaje, setMensaje] = useState<{ ok: boolean; texto: string } | null>(
-    null,
-  );
-  const [verApartados, setVerApartados] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [verCarrito, setVerCarrito] = useState(false);
   const [abierta, setAbierta] = useState<number | null>(null);
 
-  async function apartar(p: Producto) {
-    setOcupado(p.id);
-    setMensaje(null);
-    const { error } = await crearClienteNavegador().rpc("apartar_producto", {
-      p_producto: p.id,
-      p_cantidad: ES_DESTACADO(p) ? 1 : (cantidades[p.id] ?? 1),
-    });
-    setOcupado(null);
-    setMensaje(
-      error
-        ? { ok: false, texto: error.message }
-        : {
-            ok: true,
-            texto: ES_DESTACADO(p)
-              ? `¡Listo! Apartaste tu lugar en ${p.nombre}. Te esperamos en la barbería.`
-              : `¡Listo! Apartaste ${p.nombre}. Págalo y recógelo en la barbería.`,
-          },
-    );
-    if (!error) router.refresh();
-    setTimeout(() => setMensaje(null), 4000);
-  }
-
-  async function cancelar(a: Apartado) {
-    if (
-      !confirm(
-        `¿Cancelar el apartado de ${a.productos?.nombre ?? "este producto"}?`,
-      )
-    )
-      return;
-    const { error } = await crearClienteNavegador().rpc("cambiar_apartado", {
-      p_apartado: a.id,
-      p_estado: "cancelado",
-    });
-    if (error) setMensaje({ ok: false, texto: error.message });
-    router.refresh();
+  function alCarrito(p: Producto) {
+    const destacado = ES_DESTACADO(p);
+    agregar(p.id, destacado ? 1 : (cantidades[p.id] ?? 1), destacado ? 1 : 10);
+    setAviso(`${p.nombre} está en tu carrito.`);
+    setTimeout(() => setAviso(null), 3500);
   }
 
   function compartir(p: Producto) {
@@ -87,17 +53,19 @@ export function FeedProductos({
           ← Inicio
         </Link>
         <p className="font-serif text-lg text-oro">Productos</p>
-        {conSesion ? (
-          <button
-            type="button"
-            onClick={() => setVerApartados(true)}
-            className="pointer-events-auto rounded-full bg-noche/60 px-4 py-2 text-sm text-crema backdrop-blur"
-          >
-            🛍️ {apartados.length}
-          </button>
-        ) : (
-          <span className="w-16" />
-        )}
+        <button
+          type="button"
+          onClick={() => setVerCarrito(true)}
+          className="pointer-events-auto relative rounded-full bg-noche/60 px-4 py-2 text-sm text-crema backdrop-blur"
+          aria-label={`Carrito, ${piezas} piezas`}
+        >
+          🛒
+          {piezas > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-ladrillo px-1 text-xs font-bold">
+              {piezas}
+            </span>
+          )}
+        </button>
       </header>
 
       {productos.length === 0 ? (
@@ -193,48 +161,44 @@ export function FeedProductos({
                     )}
                   </div>
 
-                  {conSesion ? (
-                    <div className="mt-4 flex gap-2">
-                      {!destacado && (
-                        <select
-                          aria-label="Cantidad"
-                          value={cantidades[p.id] ?? 1}
-                          onChange={(e) =>
-                            setCantidades({
-                              ...cantidades,
-                              [p.id]: Number(e.target.value),
-                            })
-                          }
-                          className="rounded-xl border border-crema/15 bg-noche px-3 py-3 text-crema"
-                        >
-                          {[1, 2, 3, 4, 5].map((n) => (
-                            <option key={n} value={n}>
-                              {n}
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                  <div className="mt-4 flex gap-2">
+                    {!destacado && (
+                      <select
+                        aria-label="Cantidad"
+                        value={cantidades[p.id] ?? 1}
+                        onChange={(e) =>
+                          setCantidades({
+                            ...cantidades,
+                            [p.id]: Number(e.target.value),
+                          })
+                        }
+                        className="rounded-xl border border-crema/15 bg-noche px-3 py-3 text-crema"
+                      >
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                    {destacado && carrito[p.id] ? (
                       <button
                         type="button"
-                        onClick={() => apartar(p)}
-                        disabled={ocupado !== null}
-                        className="flex-1 rounded-xl bg-oro px-6 py-3 font-semibold text-noche transition hover:bg-oro-claro disabled:opacity-50"
+                        onClick={() => setVerCarrito(true)}
+                        className="flex-1 rounded-xl border border-oro px-6 py-3 font-semibold text-oro"
                       >
-                        {ocupado === p.id
-                          ? "Apartando…"
-                          : destacado
-                            ? "Apartar mi lugar"
-                            : "Apartar"}
+                        ✓ En tu carrito
                       </button>
-                    </div>
-                  ) : (
-                    <Link
-                      href="/login?siguiente=/productos"
-                      className="mt-4 block rounded-xl bg-oro px-6 py-3 text-center font-semibold text-noche"
-                    >
-                      Entra para apartar
-                    </Link>
-                  )}
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => alCarrito(p)}
+                        className="flex-1 rounded-xl bg-oro px-6 py-3 font-semibold text-noche transition hover:bg-oro-claro"
+                      >
+                        🛒 Agregar al carrito
+                      </button>
+                    )}
+                  </div>
 
                   {i === 0 && productos.length > 1 && (
                     <p className="mt-3 animate-bounce text-center text-xs text-crema/60">
@@ -248,74 +212,32 @@ export function FeedProductos({
         </div>
       )}
 
-      {mensaje && (
-        <p
+      {aviso && (
+        <div
           role="status"
-          className={`absolute inset-x-4 top-20 z-30 mx-auto max-w-md rounded-xl p-4 text-sm shadow-xl ${
-            mensaje.ok ? "bg-oro text-noche" : "bg-ladrillo text-crema"
-          }`}
+          className="absolute inset-x-4 top-20 z-30 mx-auto flex max-w-md items-center justify-between gap-3 rounded-xl bg-oro p-4 text-sm text-noche shadow-xl"
         >
-          {mensaje.texto}
-        </p>
+          <span>{aviso}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setAviso(null);
+              setVerCarrito(true);
+            }}
+            className="shrink-0 rounded-lg bg-noche px-3 py-2 font-semibold text-oro"
+          >
+            Ver carrito
+          </button>
+        </div>
       )}
 
-      {/* Mis apartados: hoja que sube desde abajo */}
-      {verApartados && (
-        <div
-          className="absolute inset-0 z-40 flex items-end bg-noche/70"
-          onClick={() => setVerApartados(false)}
-        >
-          <section
-            onClick={(e) => e.stopPropagation()}
-            className="mx-auto w-full max-w-md rounded-t-3xl border-t border-oro/40 bg-carbon p-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="font-serif text-xl text-oro">Mis apartados</h2>
-              <button
-                type="button"
-                onClick={() => setVerApartados(false)}
-                className="text-crema/70"
-              >
-                Cerrar
-              </button>
-            </div>
-            {apartados.length === 0 ? (
-              <p className="mt-3 text-sm text-crema/60">
-                Todavía no apartas nada.
-              </p>
-            ) : (
-              <>
-                <p className="mt-1 text-sm text-crema/60">
-                  Pásalos a recoger y pagar en la barbería.
-                </p>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {apartados.map((a) => (
-                    <li
-                      key={a.id}
-                      className="flex items-center justify-between gap-3 rounded-xl bg-noche px-4 py-3"
-                    >
-                      <span className="text-crema">
-                        {a.cantidad} × {a.productos?.nombre}
-                        {a.productos && (
-                          <span className="block text-sm text-crema/60">
-                            {precioBonito(a.productos.precio * a.cantidad)}
-                          </span>
-                        )}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => cancelar(a)}
-                        className="rounded-lg border border-ladrillo px-3 py-2 text-sm text-ladrillo"
-                      >
-                        Cancelar
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </section>
-        </div>
+      {verCarrito && (
+        <CarritoHoja
+          productos={productos}
+          pedidos={pedidos}
+          clienteId={clienteId}
+          onCerrar={() => setVerCarrito(false)}
+        />
       )}
     </div>
   );

@@ -45,3 +45,25 @@ export function porcentajeDescuento(
     return null;
   return Math.round((1 - Number(p.precio) / Number(p.precio_antes)) * 100);
 }
+
+export const ES_DESTACADO = (p: Pick<Producto, "orden">) => p.orden >= 1000;
+
+export type EstadoPedido = "pendiente" | "pagado" | "entregado" | "cancelado";
+
+export type Pedido = {
+  id: number;
+  metodo: "efectivo" | "transferencia";
+  comprobante: string | null;
+  total: number;
+  estado: EstadoPedido;
+  creado_en: string;
+  pedido_items: { nombre: string; precio: number; cantidad: number }[];
+  perfiles?: { nombre: string | null; telefono: string | null } | null;
+};
+
+export const ESTADO_PEDIDO: Record<EstadoPedido, string> = {
+  pendiente: "⏳ Pendiente",
+  pagado: "✅ Pagado, listo para recoger",
+  entregado: "📦 Entregado",
+  cancelado: "✖ Cancelado",
+};

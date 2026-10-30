@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { AdministrarProductos } from "@/components/AdministrarProductos";
-import { ApartadosDueno } from "@/components/ApartadosDueno";
 import { Cargando, Panel } from "@/components/Panel";
+import { PedidosDueno } from "@/components/PedidosDueno";
 import {
   COLUMNAS_PRODUCTO,
   urlFoto,
-  type Apartado,
+  type Pedido,
   type Producto,
 } from "@/lib/productos";
 import { exigirRol } from "@/lib/roles";
@@ -23,7 +23,7 @@ export default function PaginaProductosDueno() {
 async function ProductosDueno() {
   const perfil = await exigirRol(["dueno"], "/dueno/productos");
   const supabase = await crearClienteServidor();
-  const [{ data: productos }, { data: apartados }] = await Promise.all([
+  const [{ data: productos }, { data: pedidos }] = await Promise.all([
     supabase
       .from("productos")
       .select(COLUMNAS_PRODUCTO)
@@ -31,11 +31,11 @@ async function ProductosDueno() {
       .order("orden")
       .order("id"),
     supabase
-      .from("apartados")
+      .from("pedidos")
       .select(
-        "id, cantidad, creado_en, productos (nombre, precio), perfiles (nombre, telefono)",
+        "id, metodo, comprobante, total, estado, creado_en, pedido_items (nombre, precio, cantidad), perfiles (nombre, telefono)",
       )
-      .eq("estado", "pendiente")
+      .in("estado", ["pendiente", "pagado"])
       .order("creado_en"),
   ]);
 
@@ -48,6 +48,26 @@ async function ProductosDueno() {
     ),
   }));
 
+  // Enlaces temporales (1 hora) para ver las fotos de las transferencias.
+  const conComprobante = ((pedidos ?? []) as unknown as Pedido[]).filter(
+    (p) => p.comprobante,
+  );
+  const { data: firmadas } = conComprobante.length
+    ? await supabase.storage.from("comprobantes").createSignedUrls(
+        conComprobante.map((p) => p.comprobante!),
+        60 * 60,
+      )
+    : { data: [] };
+  const urlPorRuta = new Map(
+    (firmadas ?? []).map((f) => [f.path, f.signedUrl]),
+  );
+  const listaPedidos = ((pedidos ?? []) as unknown as Pedido[]).map((p) => ({
+    ...p,
+    comprobanteUrl: p.comprobante
+      ? (urlPorRuta.get(p.comprobante) ?? null)
+      : null,
+  }));
+
   return (
     <Panel titulo="Productos" nombre={perfil.nombre}>
       <Link
@@ -56,7 +76,7 @@ async function ProductosDueno() {
       >
         ← Volver al panel
       </Link>
-      <ApartadosDueno apartados={(apartados ?? []) as unknown as Apartado[]} />
+      <PedidosDueno pedidos={listaPedidos} />
       <AdministrarProductos productos={lista} />
     </Panel>
   );
