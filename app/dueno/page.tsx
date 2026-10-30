@@ -29,7 +29,7 @@ async function PanelDueno() {
         className="rounded-2xl border border-oro/40 bg-carbon p-5 transition hover:bg-oro/10"
       >
         <p className="font-serif text-xl text-oro">Lealtad</p>
-        <p className="mt-1 text-sm text-crema/70">Cuántos cortes dan uno gratis.</p>
+        <p className="mt-1 text-sm text-crema/70">Cuántos cortes dan uno gratis y el descuento por invitar.</p>
       </Link>
       <Estadisticas />
     </Panel>
