@@ -101,9 +101,10 @@ export function EnVivo() {
 
   return (
     <div className="mt-6 text-left">
-      {abierto && favorito && (
+      {favorito && (
         <MiFavorito
           nombre={favorito.nombre}
+          abierto={abierto}
           libre={favorito.estado === "libre"}
           desde={favorito.desde}
           duracionMin={duracion}
