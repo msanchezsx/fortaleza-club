@@ -31,6 +31,26 @@ const NIVELES = [
   { hasta: Infinity, nombre: "Lleno", barra: "bg-ladrillo" },
 ];
 
+// Un día típico de barbería: tranquilo temprano, lleno en la tarde y el fin de semana.
+const CURVA = [0.4, 0.6, 1.2, 1.5, 0.9, 0.7, 1.4, 2.6, 3.4, 2.2];
+const FACTOR: Record<number, number> = {
+  0: 1.3,
+  1: 0.8,
+  2: 0.7,
+  3: 0.8,
+  4: 0.9,
+  5: 1.2,
+  6: 1.6,
+};
+const EJEMPLO: Promedio[] = DIAS.flatMap(({ dia }) =>
+  HORAS.map((hora, i) => ({
+    dia,
+    hora,
+    promedio: Math.round((CURVA[i] ?? 1) * FACTOR[dia] * 10) / 10,
+    dias_con_datos: 8,
+  })),
+);
+
 function hora12(h: number) {
   return `${h % 12 || 12} ${h < 12 ? "am" : "pm"}`;
 }
@@ -46,27 +66,18 @@ export function GraficaHorarios({
 }) {
   const [dia, setDia] = useState(hoy);
 
-  const promedio = new Map(
-    datos.map((d) => [`${d.dia}-${d.hora}`, Number(d.promedio)]),
-  );
-  const maximo = Math.max(0, ...datos.map((d) => Number(d.promedio)));
-  const conDatos = new Set(
-    datos.filter((d) => d.dias_con_datos >= 2).map((d) => d.dia),
-  );
+  const reales = datos.filter((d) => Number(d.promedio) > 0);
+  // Sin datos suficientes mostramos un ejemplo (marcado) para que se entienda la gráfica.
+  const ejemplo = !reales.some((d) => d.dias_con_datos >= 2);
+  const usar = ejemplo ? EJEMPLO : reales;
 
-  if (maximo === 0 || conDatos.size === 0) {
-    return (
-      <section className="mt-8 rounded-2xl border border-oro/20 bg-carbon p-5">
-        <h2 className="font-serif text-2xl text-oro">
-          ¿Cuándo hay menos espera?
-        </h2>
-        <p className="mt-2 text-crema/70">
-          Todavía estamos juntando datos. En unas semanas verás aquí las horas
-          más tranquilas.
-        </p>
-      </section>
-    );
-  }
+  const promedio = new Map(
+    usar.map((d) => [`${d.dia}-${d.hora}`, Number(d.promedio)]),
+  );
+  const maximo = Math.max(1, ...usar.map((d) => Number(d.promedio)));
+  const conDatos = new Set(
+    usar.filter((d) => d.dias_con_datos >= 2).map((d) => d.dia),
+  );
 
   const filas = HORAS.map((h) => {
     const valor = promedio.get(`${dia}-${h}`) ?? 0;
@@ -93,9 +104,18 @@ export function GraficaHorarios({
       <h2 className="font-serif text-2xl text-oro">
         ¿Cuándo hay menos espera?
       </h2>
-      <p className="mt-1 text-sm text-crema/60">
-        Según los cortes de las últimas 8 semanas.
-      </p>
+      {ejemplo ? (
+        <p className="mt-2 rounded-xl border border-dashed border-oro/50 px-4 py-3 text-sm text-crema/80">
+          <span className="mr-2 rounded bg-oro px-2 py-0.5 text-xs font-bold text-noche uppercase">
+            Ejemplo
+          </span>
+          Así se verá cuando tengamos unas semanas de datos de la barbería.
+        </p>
+      ) : (
+        <p className="mt-1 text-sm text-crema/60">
+          Según los cortes de las últimas 8 semanas.
+        </p>
+      )}
 
       <div
         className="mt-4 grid grid-cols-7 gap-1"
