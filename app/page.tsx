@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EnVivo } from "@/components/EnVivo";
 import { EstadoAbierto } from "@/components/EstadoAbierto";
 import { LogoCastillo } from "@/components/LogoCastillo";
 import { NEGOCIO, mapsUrl, whatsappUrl } from "@/lib/negocio";
@@ -20,9 +21,7 @@ export default function Inicio() {
         <EstadoAbierto />
         <p className="mt-4 text-crema/90">{NEGOCIO.horario}</p>
         <p className="mt-2 text-sm text-crema/60">{NEGOCIO.direccion}</p>
-        <p className="mt-6 text-sm text-crema/50">
-          Muy pronto: mira aquí qué barberos están libres en este momento.
-        </p>
+        <EnVivo />
       </section>
 
       <div className="mt-6 flex w-full flex-col gap-3">
