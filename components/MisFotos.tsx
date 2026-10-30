@@ -5,12 +5,13 @@ import { comprimirFoto } from "@/lib/comprimir";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 
 const MAXIMO = 24;
+const POR_VEZ = 3;
 type Foto = { ruta: string; url: string };
 
 // Galería privada del cliente: fotos de sus cortes o de cortes que le gustan.
 export function MisFotos({ clienteId }: { clienteId: string }) {
   const [fotos, setFotos] = useState<Foto[] | null>(null);
-  const [subiendo, setSubiendo] = useState(false);
+  const [subiendo, setSubiendo] = useState<string | false>(false);
   const [error, setError] = useState<string | null>(null);
   const [abierta, setAbierta] = useState<Foto | null>(null);
   const entrada = useRef<HTMLInputElement>(null);
@@ -46,27 +47,44 @@ export function MisFotos({ clienteId }: { clienteId: string }) {
     void cargar();
   }, [cargar]);
 
-  async function subir(archivo: File | undefined) {
-    if (!archivo) return;
-    setError(null);
-    setSubiendo(true);
+  async function subir(lista: FileList | null) {
+    const archivos = Array.from(lista ?? []).slice(0, POR_VEZ);
+    if (archivos.length === 0) return;
+    const espacio = MAXIMO - (fotos?.length ?? 0);
+    setError(
+      (lista?.length ?? 0) > POR_VEZ
+        ? `Puedes subir hasta ${POR_VEZ} fotos a la vez; subimos las primeras ${POR_VEZ}.`
+        : null,
+    );
+    setSubiendo(`1 de ${archivos.length}`);
     try {
-      const foto = await comprimirFoto(archivo);
-      const { error } = await crearClienteNavegador()
-        .storage.from("fotos")
-        .upload(`${clienteId}/${Date.now()}.jpg`, foto, {
-          contentType: "image/jpeg",
-        });
-      if (error)
+      if (archivos.length > espacio)
         throw new Error(
-          error.message.includes("security")
-            ? `Llegaste al máximo de ${MAXIMO} fotos.`
-            : error.message,
+          `Solo te quedan ${espacio} lugares de ${MAXIMO} fotos.`,
         );
-      await cargar();
+      const almacen = crearClienteNavegador().storage.from("fotos");
+      const base = Date.now();
+      for (const [i, archivo] of archivos.entries()) {
+        setSubiendo(`${i + 1} de ${archivos.length}`);
+        const foto = await comprimirFoto(archivo);
+        const { error } = await almacen.upload(
+          `${clienteId}/${base + i}.jpg`,
+          foto,
+          {
+            contentType: "image/jpeg",
+          },
+        );
+        if (error)
+          throw new Error(
+            error.message.includes("security")
+              ? `Llegaste al máximo de ${MAXIMO} fotos.`
+              : error.message,
+          );
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo subir la foto.");
     } finally {
+      await cargar();
       setSubiendo(false);
       if (entrada.current) entrada.current.value = "";
     }
@@ -98,19 +116,20 @@ export function MisFotos({ clienteId }: { clienteId: string }) {
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(e) => subir(e.target.files?.[0])}
+        multiple
+        onChange={(e) => subir(e.target.files)}
       />
       <button
         type="button"
         onClick={() => entrada.current?.click()}
-        disabled={subiendo || llena || fotos === null}
+        disabled={subiendo !== false || llena || fotos === null}
         className="mt-4 w-full rounded-xl bg-oro px-6 py-3 font-semibold text-noche transition hover:bg-oro-claro disabled:opacity-50"
       >
         {subiendo
-          ? "Subiendo…"
+          ? `Subiendo ${subiendo}…`
           : llena
             ? `Máximo ${MAXIMO} fotos`
-            : "📷 Subir foto"}
+            : "📷 Subir fotos (hasta 3)"}
       </button>
       {error && <p className="mt-3 text-sm text-ladrillo">{error}</p>}
 
