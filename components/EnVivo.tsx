@@ -14,7 +14,7 @@ type Fila = { id: string; nombre: string; estado_barbero: { estado: Estado; desd
 export function EnVivo() {
   const [barberos, setBarberos] = useState<Barbero[] | null>(null);
   const [abierto, setAbierto] = useState(true);
-  const [duracion, setDuracion] = useState(30);
+  const [duracion, setDuracion] = useState(35);
   const [ahora, setAhora] = useState(0);
 
   useEffect(() => {
