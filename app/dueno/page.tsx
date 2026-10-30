@@ -32,6 +32,13 @@ async function PanelDueno() {
         <p className="font-serif text-xl text-oro">Lealtad</p>
         <p className="mt-1 text-sm text-crema/70">Cuántos cortes dan uno gratis y el descuento por invitar.</p>
       </Link>
+      <Link
+        href="/dueno/productos"
+        className="rounded-2xl border border-oro/40 bg-carbon p-5 transition hover:bg-oro/10"
+      >
+        <p className="font-serif text-xl text-oro">Productos</p>
+        <p className="mt-1 text-sm text-crema/70">Agregar productos y entregar los que apartaron los clientes.</p>
+      </Link>
       <Estadisticas />
       <MejoresHorarios />
     </Panel>
