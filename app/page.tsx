@@ -30,6 +30,12 @@ export default function Inicio() {
         >
           Horarios para cita
         </Link>
+        <Link
+          href="/productos"
+          className="rounded-xl border border-oro/50 px-6 py-4 font-semibold text-oro transition hover:bg-oro/10"
+        >
+          Productos
+        </Link>
         <a
           href={mapsUrl}
           target="_blank"
