@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { estimarLiberacion, textoLiberacion } from "@/lib/estimado";
 import { estaAbierto } from "@/lib/negocio";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 import { supabaseConfigurado } from "@/lib/supabase/config";
 
 type Estado = "libre" | "atendiendo";
-type Barbero = { id: string; nombre: string; estado: Estado };
-type Fila = { id: string; nombre: string; estado_barbero: { estado: Estado } | null };
+type Barbero = { id: string; nombre: string; estado: Estado; desde: string };
+type Fila = { id: string; nombre: string; estado_barbero: { estado: Estado; desde: string } | null };
 
 // "Ahora en La Fortaleza": qué barberos están libres, en tiempo real.
 export function EnVivo() {
   const [barberos, setBarberos] = useState<Barbero[] | null>(null);
   const [abierto, setAbierto] = useState(true);
+  const [duracion, setDuracion] = useState(30);
+  const [ahora, setAhora] = useState(0);
 
   useEffect(() => {
     if (!supabaseConfigurado) return;
@@ -21,27 +24,43 @@ export function EnVivo() {
     async function cargar() {
       const { data } = await supabase
         .from("barberos")
-        .select("id, nombre, estado_barbero (estado)")
+        .select("id, nombre, estado_barbero (estado, desde)")
         .eq("activo", true)
         .order("nombre")
         .returns<Fila[]>();
-      setBarberos((data ?? []).map((b) => ({ id: b.id, nombre: b.nombre, estado: b.estado_barbero?.estado ?? "libre" })));
+      setBarberos(
+        (data ?? []).map((b) => ({
+          id: b.id,
+          nombre: b.nombre,
+          estado: b.estado_barbero?.estado ?? "libre",
+          desde: b.estado_barbero?.desde ?? new Date().toISOString(),
+        })),
+      );
+      const { data: minutos } = await supabase.rpc("duracion_corte_min");
+      if (typeof minutos === "number") setDuracion(minutos);
     }
 
     cargar();
-    const revisarHorario = () => setAbierto(estaAbierto());
+    const revisarHorario = () => {
+      setAbierto(estaAbierto());
+      setAhora(Date.now());
+    };
     revisarHorario();
-    const reloj = setInterval(revisarHorario, 60_000);
+    const reloj = setInterval(revisarHorario, 30_000);
 
     // Cuando un barbero cambia su estado, se actualiza aquí sin recargar.
     const canal = supabase
       .channel("estado-barberos")
       .on("postgres_changes", { event: "*", schema: "public", table: "estado_barbero" }, (cambio) => {
-        const nuevo = cambio.new as { barbero_id?: string; estado?: Estado };
+        const nuevo = cambio.new as { barbero_id?: string; estado?: Estado; desde?: string };
         if (!nuevo.barbero_id || !nuevo.estado) return;
-        setBarberos((lista) =>
-          lista?.map((b) => (b.id === nuevo.barbero_id ? { ...b, estado: nuevo.estado! } : b)) ?? lista,
+        setBarberos(
+          (lista) =>
+            lista?.map((b) =>
+              b.id === nuevo.barbero_id ? { ...b, estado: nuevo.estado!, desde: nuevo.desde ?? b.desde } : b,
+            ) ?? lista,
         );
+        setAhora(Date.now());
       })
       .subscribe();
 
@@ -62,6 +81,8 @@ export function EnVivo() {
   if (barberos.length === 0) return null;
 
   const libres = barberos.filter((b) => b.estado === "libre").length;
+  const ocupados = barberos.filter((b) => b.estado === "atendiendo").map((b) => b.desde);
+  const proximo = ahora && libres < barberos.length ? estimarLiberacion(ocupados, duracion, ahora) : null;
   const ocupacion = 1 - libres / barberos.length;
   const nivel =
     !abierto ? null : libres === 0 ? "Lleno, hay espera" : ocupacion >= 0.6 ? "Algo lleno" : "Tranquilo, sin espera";
@@ -85,6 +106,11 @@ export function EnVivo() {
             />
           </div>
           <p className="mt-2 text-sm text-crema/80">{nivel}</p>
+          {proximo && libres <= 1 && (
+            <p className="mt-2 rounded-lg bg-oro/10 px-3 py-2 text-sm text-oro-claro">
+              ⏱ {textoLiberacion(proximo)}
+            </p>
+          )}
         </>
       )}
 

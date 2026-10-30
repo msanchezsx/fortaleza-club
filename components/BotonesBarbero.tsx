@@ -8,26 +8,30 @@ export type Estado = "libre" | "atendiendo";
 export function BotonesBarbero({
   barberoId,
   estadoInicial,
+  desdeInicial,
   cortesHoyInicial,
 }: {
   barberoId: string;
   estadoInicial: Estado;
+  desdeInicial: string | null;
   cortesHoyInicial: number;
 }) {
   const [estado, setEstado] = useState<Estado>(estadoInicial);
+  const [desde, setDesde] = useState<string | null>(desdeInicial);
   const [cortesHoy, setCortesHoy] = useState(cortesHoyInicial);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
 
   async function cambiarEstado(nuevo: Estado) {
-    const supabase = crearClienteNavegador();
-    const { error } = await supabase
+    const ahora = new Date().toISOString();
+    const { error } = await crearClienteNavegador()
       .from("estado_barbero")
-      .update({ estado: nuevo, desde: new Date().toISOString() })
+      .update({ estado: nuevo, desde: ahora })
       .eq("barbero_id", barberoId);
     if (error) throw error;
     setEstado(nuevo);
+    setDesde(ahora);
   }
 
   async function ejecutar(accion: () => Promise<void>) {
@@ -45,7 +49,8 @@ export function BotonesBarbero({
 
   const terminarCorte = () =>
     ejecutar(async () => {
-      const { error } = await crearClienteNavegador().from("cortes").insert({ barbero_id: barberoId });
+      const { error } = await crearClienteNavegador().from("cortes")
+        .insert({ barbero_id: barberoId, inicio: estado === "atendiendo" ? desde : null });
       if (error) throw error;
       setCortesHoy((n) => n + 1);
       await cambiarEstado("libre");

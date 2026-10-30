@@ -19,9 +19,9 @@ async function PanelBarbero() {
 
   const { data: barbero } = await supabase
     .from("barberos")
-    .select("id, nombre, activo, estado_barbero (estado)")
+    .select("id, nombre, activo, estado_barbero (estado, desde)")
     .eq("perfil_id", perfil.id)
-    .maybeSingle<{ id: string; nombre: string; activo: boolean; estado_barbero: { estado: Estado } | null }>();
+    .maybeSingle<{ id: string; nombre: string; activo: boolean; estado_barbero: { estado: Estado; desde: string } | null }>();
 
   if (!barbero || !barbero.activo) {
     return (
@@ -46,6 +46,7 @@ async function PanelBarbero() {
       <BotonesBarbero
         barberoId={barbero.id}
         estadoInicial={barbero.estado_barbero?.estado ?? "libre"}
+        desdeInicial={barbero.estado_barbero?.desde ?? null}
         cortesHoyInicial={count ?? 0}
       />
     </Panel>
