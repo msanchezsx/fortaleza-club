@@ -5,7 +5,16 @@ import { HORAS_CITA, horaBonita, instanteMexico, proximosDias } from "@/lib/cita
 import { crearClienteNavegador } from "@/lib/supabase/client";
 
 // El barbero toca las horas tranquilas en las que acepta cita.
-export function AbrirHorarios({ barberoId, abiertos }: { barberoId: string; abiertos: string[] }) {
+export function AbrirHorarios({
+  barberoId,
+  abiertos,
+  apartados,
+}: {
+  barberoId: string;
+  abiertos: string[];
+  apartados: string[];
+}) {
+  const [conCita] = useState(() => new Set(apartados.map((i) => new Date(i).getTime())));
   const [ahora, setAhora] = useState(0);
   const [dia, setDia] = useState<string | null>(null);
   const [seleccion, setSeleccion] = useState(() => new Set(abiertos.map((i) => new Date(i).getTime())));
@@ -79,17 +88,23 @@ export function AbrirHorarios({ barberoId, abiertos }: { barberoId: string; abie
           const ms = new Date(inicio).getTime();
           const pasado = ms <= ahora;
           const abierto = seleccion.has(ms);
+          const apartado = conCita.has(ms);
           return (
             <button
               key={h}
-              disabled={pasado || guardando !== null}
+              disabled={pasado || apartado || guardando !== null}
               onClick={() => cambiar(inicio)}
               aria-pressed={abierto}
               className={`rounded-xl border px-2 py-3 text-sm transition disabled:opacity-30 ${
-                abierto ? "border-oro bg-oro font-semibold text-noche" : "border-crema/15 text-crema/80"
+                apartado
+                  ? "border-emerald-400/60 bg-emerald-400/15 text-emerald-300 disabled:opacity-100"
+                  : abierto
+                    ? "border-oro bg-oro font-semibold text-noche"
+                    : "border-crema/15 text-crema/80"
               } ${guardando === ms ? "animate-pulse" : ""}`}
             >
               {horaBonita(inicio)}
+              {apartado && <span className="block text-[10px] tracking-wide uppercase">Con cita</span>}
             </button>
           );
         })}
