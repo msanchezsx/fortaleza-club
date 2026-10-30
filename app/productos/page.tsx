@@ -5,7 +5,7 @@ import { Cargando } from "@/components/Panel";
 import {
   COLUMNAS_PRODUCTO,
   urlFoto,
-  type Apartado,
+  type Pedido,
   type Producto,
 } from "@/lib/productos";
 import { supabaseConfigurado } from "@/lib/supabase/config";
@@ -35,13 +35,16 @@ async function ListaProductos() {
   ]);
   const usuario = claims?.claims.sub;
 
-  const { data: apartados } = usuario
+  const { data: pedidos } = usuario
     ? await supabase
-        .from("apartados")
-        .select("id, cantidad, creado_en, productos (nombre, precio)")
+        .from("pedidos")
+        .select(
+          "id, metodo, comprobante, total, estado, creado_en, pedido_items (nombre, precio, cantidad)",
+        )
         .eq("cliente_id", usuario)
-        .eq("estado", "pendiente")
-        .order("creado_en")
+        .neq("estado", "cancelado")
+        .order("creado_en", { ascending: false })
+        .limit(10)
     : { data: [] };
 
   const lista = ((productos ?? []) as Producto[]).map((p) => ({
@@ -56,8 +59,8 @@ async function ListaProductos() {
   return (
     <FeedProductos
       productos={lista}
-      apartados={(apartados ?? []) as unknown as Apartado[]}
-      conSesion={Boolean(usuario)}
+      pedidos={(pedidos ?? []) as unknown as Pedido[]}
+      clienteId={usuario ?? null}
     />
   );
 }

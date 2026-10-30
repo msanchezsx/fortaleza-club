@@ -2,7 +2,8 @@
 export const NEGOCIO = {
   nombre: "La Fortaleza",
   subtitulo: "Barbería",
-  direccion: "Av. Malaquías Huitrón S/n, San Lorenzo Tetlixtac, 55714 Coacalco, Méx.",
+  direccion:
+    "Av. Malaquías Huitrón S/n, San Lorenzo Tetlixtac, 55714 Coacalco, Méx.",
   horario: "Todos los días de 11:00 am a 9:00 pm",
   abre: 11,
   cierra: 21,
@@ -11,6 +12,12 @@ export const NEGOCIO = {
   maps: "https://maps.app.goo.gl/u2SYuPBwMKk1z8waA",
   // Dirección pública de la app (para los enlaces de invitación)
   sitio: "https://fortaleza-club.vercel.app",
+  // Datos para pagar por transferencia. Si están vacíos, la app pide pedirlos por WhatsApp.
+  transferencia: {
+    banco: "",
+    clabe: "",
+    titular: "",
+  },
 };
 
 export const mapsUrl = NEGOCIO.maps;
@@ -37,13 +44,17 @@ export function estaAbierto(fecha = new Date()): boolean {
 
 // Inicio del día de hoy en Ciudad de México (UTC-6 todo el año desde 2022), en formato ISO.
 export function inicioDelDiaMexico(fecha = new Date()): string {
-  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(fecha);
+  const ymd = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+  }).format(fecha);
   return `${ymd}T00:00:00-06:00`;
 }
 
 // Inicio de hoy, de esta semana (lunes), de este mes y de hace N días, en hora de México.
 export function periodosMexico(fecha = new Date(), dias = 14) {
-  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Mexico_City" }).format(fecha);
+  const ymd = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Mexico_City",
+  }).format(fecha);
   const hoy = new Date(`${ymd}T00:00:00Z`); // solo para contar días, sin zona
   const aIso = (d: Date) => `${d.toISOString().slice(0, 10)}T00:00:00-06:00`;
   const restar = (n: number) => new Date(hoy.getTime() - n * 86_400_000);

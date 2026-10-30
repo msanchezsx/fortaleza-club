@@ -37,7 +37,7 @@ async function PanelDueno() {
         className="rounded-2xl border border-oro/40 bg-carbon p-5 transition hover:bg-oro/10"
       >
         <p className="font-serif text-xl text-oro">Productos</p>
-        <p className="mt-1 text-sm text-crema/70">Agregar productos y entregar los que apartaron los clientes.</p>
+        <p className="mt-1 text-sm text-crema/70">Agregar productos y atender los pedidos de los clientes.</p>
       </Link>
       <Estadisticas />
       <MejoresHorarios />
