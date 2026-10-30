@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { ApartarCita } from "@/components/ApartarCita";
 import { LogoCastillo } from "@/components/LogoCastillo";
+import { MejoresHorarios } from "@/components/MejoresHorarios";
 import { Cargando } from "@/components/Panel";
 import { diaMexico, horaBonita, proximosDias } from "@/lib/citas";
 import { supabaseConfigurado } from "@/lib/supabase/config";
@@ -23,6 +24,9 @@ export default function PaginaCitas() {
       <p className="mt-1 text-crema/70">Horas tranquilas que abrieron nuestros barberos. Sin cita también te atendemos.</p>
       <Suspense fallback={<Cargando />}>
         <ListaHorarios />
+      </Suspense>
+      <Suspense>
+        <MejoresHorarios />
       </Suspense>
     </main>
   );
