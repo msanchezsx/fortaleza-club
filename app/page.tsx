@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EstadoAbierto } from "@/components/EstadoAbierto";
 import { LogoCastillo } from "@/components/LogoCastillo";
 import { NEGOCIO, mapsUrl, whatsappUrl } from "@/lib/negocio";
@@ -5,6 +6,9 @@ import { NEGOCIO, mapsUrl, whatsappUrl } from "@/lib/negocio";
 export default function Inicio() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-10 text-center">
+      <Link href="/login" className="self-end text-sm text-crema/60 underline-offset-4 hover:text-oro hover:underline">
+        Entrar
+      </Link>
       <LogoCastillo className="h-24 w-24 text-oro" />
       <h1 className="mt-4 font-serif text-4xl tracking-wide text-oro">{NEGOCIO.nombre}</h1>
       <p className="font-serif text-lg tracking-[0.3em] text-crema/80 uppercase">
