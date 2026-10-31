@@ -7,13 +7,10 @@ import { NEGOCIO } from "@/lib/negocio";
 export default function Inicio() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-8 text-center">
-      <div className="flex items-center gap-3">
-        <LogoCastillo className="h-16 w-16 text-oro" />
-        <div className="text-left">
-          <h1 className="font-serif text-3xl tracking-wide text-oro">{NEGOCIO.nombre}</h1>
-          <p className="font-serif text-sm tracking-[0.3em] text-crema/80 uppercase">{NEGOCIO.subtitulo}</p>
-        </div>
-      </div>
+      <LogoCastillo className="h-32 w-32 text-oro drop-shadow-[0_0_18px_rgba(201,166,95,0.35)]" />
+      <h1 className="mt-3 font-serif text-5xl tracking-wide text-oro">{NEGOCIO.nombre}</h1>
+      <p className="mt-1 font-serif text-xl tracking-[0.4em] text-crema/80 uppercase">{NEGOCIO.subtitulo}</p>
+      <div className="mt-4 h-px w-24 bg-oro/40" />
 
       <MenuPrincipal />
 
