@@ -6,6 +6,7 @@ import { crearClienteNavegador } from "@/lib/supabase/client";
 
 const MAXIMO = 24;
 const POR_VEZ = 3;
+const SEGUNDOS = 3;
 type Foto = { ruta: string; url: string };
 
 // Galería privada del cliente: fotos de sus cortes o de cortes que le gustan.
@@ -13,8 +14,28 @@ export function MisFotos({ clienteId }: { clienteId: string }) {
   const [fotos, setFotos] = useState<Foto[] | null>(null);
   const [subiendo, setSubiendo] = useState<string | false>(false);
   const [error, setError] = useState<string | null>(null);
-  const [abierta, setAbierta] = useState<Foto | null>(null);
+  const [indice, setIndice] = useState<number | null>(null);
   const entrada = useRef<HTMLInputElement>(null);
+  const toque = useRef<number | null>(null);
+
+  const total = fotos?.length ?? 0;
+  const abierta = indice !== null && fotos ? (fotos[indice] ?? null) : null;
+
+  const mover = useCallback(
+    (paso: number) =>
+      setIndice((i) =>
+        i === null || total === 0 ? i : (i + paso + total) % total,
+      ),
+    [total],
+  );
+
+  // Con dos o más fotos, pasa sola a la siguiente. Si el cliente cambia de foto
+  // a mano, el tiempo vuelve a empezar.
+  useEffect(() => {
+    if (indice === null || total < 2) return;
+    const reloj = setTimeout(() => mover(1), SEGUNDOS * 1000);
+    return () => clearTimeout(reloj);
+  }, [indice, total, mover]);
 
   const cargar = useCallback(async () => {
     const almacen = crearClienteNavegador().storage.from("fotos");
@@ -92,7 +113,7 @@ export function MisFotos({ clienteId }: { clienteId: string }) {
 
   async function borrar(foto: Foto) {
     if (!confirm("¿Borrar esta foto?")) return;
-    setAbierta(null);
+    setIndice(null);
     const { error } = await crearClienteNavegador()
       .storage.from("fotos")
       .remove([foto.ruta]);
@@ -139,11 +160,11 @@ export function MisFotos({ clienteId }: { clienteId: string }) {
         <p className="mt-4 text-sm text-crema/60">Todavía no tienes fotos.</p>
       ) : (
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {fotos.map((f) => (
+          {fotos.map((f, i) => (
             <button
               key={f.ruta}
               type="button"
-              onClick={() => setAbierta(f)}
+              onClick={() => setIndice(i)}
               className="aspect-square overflow-hidden rounded-lg"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de Supabase */}
@@ -160,18 +181,51 @@ export function MisFotos({ clienteId }: { clienteId: string }) {
       {abierta && (
         <div
           className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-noche/95 p-4"
-          onClick={() => setAbierta(null)}
+          onClick={() => setIndice(null)}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- URL firmada de Supabase */}
           <img
+            key={abierta.ruta}
             src={abierta.url}
             alt="Foto de corte"
-            className="max-h-[75vh] max-w-full rounded-xl"
+            className="max-h-[70vh] max-w-full animate-[aparecer_0.4s_ease-out] rounded-xl"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Tocar la mitad izquierda regresa, la derecha avanza.
+              const caja = e.currentTarget.getBoundingClientRect();
+              mover(e.clientX < caja.left + caja.width / 2 ? -1 : 1);
+            }}
+            onTouchStart={(e) => {
+              toque.current = e.touches[0].clientX;
+            }}
+            onTouchEnd={(e) => {
+              const inicio = toque.current;
+              toque.current = null;
+              if (inicio === null) return;
+              const distancia = e.changedTouches[0].clientX - inicio;
+              if (Math.abs(distancia) > 40) {
+                e.preventDefault();
+                mover(distancia < 0 ? 1 : -1);
+              }
+            }}
           />
+          {total > 1 && (
+            <div
+              className="flex items-center gap-2"
+              aria-label={`Foto ${indice! + 1} de ${total}`}
+            >
+              {fotos!.map((f, i) => (
+                <span
+                  key={f.ruta}
+                  className={`h-2 rounded-full transition-all ${i === indice ? "w-6 bg-oro" : "w-2 bg-crema/30"}`}
+                />
+              ))}
+            </div>
+          )}
           <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
-              onClick={() => setAbierta(null)}
+              onClick={() => setIndice(null)}
               className="rounded-xl border border-oro/50 px-6 py-3 font-semibold text-oro"
             >
               Cerrar

@@ -17,3 +17,13 @@ body {
   background: var(--color-noche);
   color: var(--color-crema);
 }
+
+/* Las fotos del visor aparecen suavemente al cambiar. */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
