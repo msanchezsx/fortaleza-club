@@ -35,12 +35,13 @@ body {
   z-index: 100;
   pointer-events: none;
   animation:
-    bienvenida-sale 0.6s ease-in 2s forwards,
-    bienvenida-fin 0s linear 2.6s forwards;
+    bienvenida-sale 0.6s ease-in 2.2s forwards,
+    bienvenida-fin 0s linear 2.8s forwards;
 }
 html[data-bienvenida="vista"] .bienvenida,
-html:not([data-intro="barbero"]) .bienvenida-barbero,
-html[data-intro="barbero"] .bienvenida-caramelo {
+html:not([data-intro="poste"]) .bienvenida-poste,
+html:not([data-intro="caramelo"]) .bienvenida-caramelo,
+html:not([data-intro="barbero"]) .bienvenida-barbero {
   display: none;
 }
 .bienvenida-puerta {
@@ -138,6 +139,94 @@ html[data-intro="barbero"] .bienvenida-caramelo {
     visibility: hidden;
   }
 }
+/* Principal: caramelo clásico dentro de un aro dorado */
+.bienvenida-poste {
+  background: radial-gradient(circle at 50% 40%, #232731, var(--color-noche) 70%);
+}
+.poste {
+  position: relative;
+  width: 220px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.poste-aro {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  overflow: visible;
+}
+.poste-aro circle {
+  fill: rgb(201 164 92 / 0.06);
+  stroke: var(--color-oro);
+  stroke-width: 3;
+  stroke-dasharray: 591;
+  stroke-dashoffset: 591;
+  transform-box: view-box;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  animation: aro-dibuja 0.9s ease-out 0.1s forwards;
+}
+.poste-cuerpo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0 12px 18px rgb(0 0 0 / 0.55));
+  animation: caramelo-entra 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) 0.15s both;
+}
+.poste-bola {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #fff4dc,
+    var(--color-oro-claro) 30%,
+    #8a6d35 85%
+  );
+}
+.poste-tapa {
+  width: 58px;
+  height: 22px;
+  margin-top: -3px;
+  border-radius: 29px 29px 4px 4px;
+  background: linear-gradient(
+    90deg,
+    #7a5f2c,
+    var(--color-oro-claro) 38%,
+    var(--color-oro) 60%,
+    #7a5f2c
+  );
+}
+.poste-tapa-abajo {
+  margin: 0 0 -3px;
+  border-radius: 4px 4px 29px 29px;
+}
+.poste-anillo {
+  width: 66px;
+  height: 9px;
+  border-radius: 3px;
+  background:
+    linear-gradient(
+      transparent 40%,
+      rgb(0 0 0 / 0.35) 40% 55%,
+      transparent 55%
+    ),
+    linear-gradient(90deg, #7a5f2c, var(--color-oro-claro) 38%, #7a5f2c);
+}
+.poste-tubo {
+  width: 44px;
+  height: 150px;
+  border-radius: 0;
+}
+@keyframes aro-dibuja {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Opción 2: silueta del barbero cortando */
 .bienvenida-barbero {
   background: linear-gradient(180deg, var(--color-carbon), var(--color-noche));
