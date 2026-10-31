@@ -32,13 +32,13 @@ export function Bienvenida() {
                 <span className="poste-bola" />
               </div>
             </div>
-            <div className="pieza" style={{ animationDelay: "0.55s" }}>
+            <div className="pieza" style={{ animationDelay: "1.55s" }}>
               <Navaja />
             </div>
-            <div className="pieza" style={{ animationDelay: "1s" }}>
+            <div className="pieza" style={{ animationDelay: "3s" }}>
               <Maquina />
             </div>
-            <div className="pieza" style={{ animationDelay: "1.45s" }}>
+            <div className="pieza" style={{ animationDelay: "4.45s" }}>
               <TijerasAbiertas />
             </div>
             <div className="pieza pieza-final">
