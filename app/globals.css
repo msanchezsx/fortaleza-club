@@ -28,147 +28,70 @@ body {
   }
 }
 
-/* Bienvenida: el caramelo gira frente a las puertas del castillo, luego las
-   puertas se abren hacia adentro y entramos a la app. Dura ~3.4 s. */
+/* Bienvenida: el caramelo gira ~2 s y luego todo se desvanece. */
 .bienvenida {
   position: fixed;
   inset: 0;
   z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.25rem;
   pointer-events: none;
-  /* Muro de piedra */
-  background:
-    linear-gradient(rgb(0 0 0 / 0.35) 2px, transparent 2px) 0 0 / 100% 36px,
-    linear-gradient(90deg, rgb(0 0 0 / 0.35) 2px, transparent 2px) 0 0 / 72px 72px,
-    linear-gradient(90deg, rgb(0 0 0 / 0.35) 2px, transparent 2px) 36px 36px /
-      72px 72px,
-    linear-gradient(180deg, #23262e, var(--color-noche));
   animation:
-    bienvenida-sale 0.6s ease-in 2.8s forwards,
-    bienvenida-fin 0s linear 3.4s forwards;
+    bienvenida-sale 0.6s ease-in 2s forwards,
+    bienvenida-fin 0s linear 2.6s forwards;
 }
 html[data-bienvenida="vista"] .bienvenida {
   display: none;
 }
-.bienvenida-titulo {
-  text-align: center;
-  animation: titulo-sale 0.4s ease-in 1.5s forwards;
-}
-/* Arco de piedra con las dos puertas */
-.portal {
-  position: relative;
-  width: min(78vw, 320px);
-  height: min(58vh, 440px);
-  border: 14px solid #4a4d55;
-  border-bottom: none;
-  border-radius: 160px 160px 0 0;
-  box-shadow:
-    inset 0 0 0 2px var(--color-oro),
-    0 0 0 2px var(--color-oro),
-    0 30px 60px rgb(0 0 0 / 0.6);
-  overflow: hidden;
-  perspective: 900px;
-  animation: portal-entra 0.7s cubic-bezier(0.5, 0, 0.2, 1) 2.5s forwards;
-}
-/* La luz que se ve al abrir */
-.portal-luz {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    circle at 50% 60%,
-    #fff8e7,
-    var(--color-oro-claro) 35%,
-    var(--color-oro) 70%
-  );
-}
-.puerta {
+.bienvenida-puerta {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 50%;
-  /* Tablones de madera y dos bandas de hierro */
+  width: 50.5%;
   background:
-    linear-gradient(
-        transparent 22%,
-        #1b1b1f 22% 27%,
-        transparent 27% 73%,
-        #1b1b1f 73% 78%,
-        transparent 78%
-      ),
     repeating-linear-gradient(
-      90deg,
-      #6b4226 0 26px,
-      #5a361f 26px 28px,
-      #7a4b2b 28px 54px,
-      #4f2f1b 54px 56px
-    );
-  box-shadow: inset 0 0 30px rgb(0 0 0 / 0.55);
+      0deg,
+      transparent 0 46px,
+      rgb(0 0 0 / 0.25) 46px 48px
+    ),
+    linear-gradient(180deg, var(--color-carbon), var(--color-noche));
 }
-.puerta-izquierda {
+.bienvenida-izquierda {
   left: 0;
-  transform-origin: left center;
-  border-right: 1px solid #2a1a10;
-  animation: abre-izquierda 1.1s cubic-bezier(0.5, 0, 0.4, 1) 1.6s forwards;
+  border-right: 2px solid var(--color-oro);
 }
-.puerta-derecha {
+.bienvenida-derecha {
   right: 0;
-  transform-origin: right center;
-  border-left: 1px solid #2a1a10;
-  animation: abre-derecha 1.1s cubic-bezier(0.5, 0, 0.4, 1) 1.6s forwards;
+  border-left: 2px solid var(--color-oro);
 }
-/* Aldabas (argollas) de hierro */
-.puerta::after {
-  content: "";
+.bienvenida-centro {
   position: absolute;
-  top: 52%;
-  width: 22px;
-  height: 22px;
-  border: 4px solid var(--color-oro);
-  border-radius: 50%;
-}
-.puerta-izquierda::after {
-  right: 12px;
-}
-.puerta-derecha::after {
-  left: 12px;
-}
-.caramelo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 2;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  filter: drop-shadow(0 10px 18px rgb(0 0 0 / 0.6));
-  transform: translate(-50%, -50%);
-  animation:
-    caramelo-entra 0.5s ease-out both,
-    caramelo-sale 0.35s ease-in 1.4s forwards;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.caramelo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: caramelo-entra 0.5s ease-out both;
 }
 .caramelo-tapa {
-  width: 4rem;
-  height: 1.2rem;
+  width: 4.5rem;
+  height: 1.4rem;
   border-radius: 9999px 9999px 0.4rem 0.4rem;
-  background: linear-gradient(
-    90deg,
-    #8a6d35,
-    var(--color-oro-claro) 40%,
-    #8a6d35
-  );
+  background: linear-gradient(90deg, #8a6d35, var(--color-oro-claro) 40%, #8a6d35);
 }
 .caramelo-tapa-abajo {
   border-radius: 0.4rem 0.4rem 9999px 9999px;
 }
 .caramelo-tubo {
   position: relative;
-  width: 3rem;
-  height: 8.5rem;
+  width: 3.5rem;
+  height: 10rem;
   overflow: hidden;
+  border-radius: 0.3rem;
   background: repeating-linear-gradient(
     -45deg,
     var(--color-ladrillo) 0 14px,
@@ -200,37 +123,7 @@ html[data-bienvenida="vista"] .bienvenida {
 @keyframes caramelo-entra {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.6);
-  }
-}
-@keyframes caramelo-sale {
-  to {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.4);
-  }
-}
-@keyframes titulo-sale {
-  to {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-}
-@keyframes abre-izquierda {
-  to {
-    transform: rotateY(-100deg);
-    filter: brightness(0.5);
-  }
-}
-@keyframes abre-derecha {
-  to {
-    transform: rotateY(100deg);
-    filter: brightness(0.5);
-  }
-}
-/* Entramos por la puerta: el arco crece hasta llenar la pantalla */
-@keyframes portal-entra {
-  to {
-    transform: scale(4);
+    transform: scale(0.7);
   }
 }
 @keyframes bienvenida-sale {
