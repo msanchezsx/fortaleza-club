@@ -39,8 +39,8 @@ body {
     bienvenida-fin 0s linear 2.6s forwards;
 }
 html[data-bienvenida="vista"] .bienvenida,
-html:not([data-intro="tijeras"]) .bienvenida-tijeras,
-html[data-intro="tijeras"] .bienvenida-caramelo {
+html:not([data-intro="barbero"]) .bienvenida-barbero,
+html[data-intro="barbero"] .bienvenida-caramelo {
   display: none;
 }
 .bienvenida-puerta {
@@ -138,98 +138,48 @@ html[data-intro="tijeras"] .bienvenida-caramelo {
     visibility: hidden;
   }
 }
-/* Opción 2: tijeras cortando pelo */
-.bienvenida-tijeras {
+/* Opción 2: silueta del barbero cortando */
+.bienvenida-barbero {
   background: linear-gradient(180deg, var(--color-carbon), var(--color-noche));
 }
-.corte {
-  position: relative;
-  width: 280px;
-  height: 200px;
+.escena-barbero {
+  width: min(70vw, 280px);
+  height: auto;
+  animation: caramelo-entra 0.5s ease-out both;
 }
-.mechon {
-  position: absolute;
-  left: calc(50% + var(--x) - 2px);
-  top: 0;
-  transform: rotate(var(--ladeo));
-  transform-origin: top center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.mechon-arriba,
-.mechon-abajo {
-  width: 4px;
-  background: linear-gradient(90deg, #3a2618, #8a6244 50%, #3a2618);
-}
-.mechon-arriba {
-  height: 100px;
-  border-radius: 3px 3px 0 0;
-}
-.mechon-abajo {
-  height: 70px;
-  border-radius: 0 0 3px 3px;
-  transform-origin: top center;
-  animation: mechon-cae 0.9s cubic-bezier(0.4, 0, 0.8, 0.6) var(--retraso)
-    forwards;
-}
-.tijeras {
-  overflow: visible;
-}
-.tijeras-hoja {
+.barbero-brazo {
   transform-box: view-box;
-  transform-origin: 50% 50%;
-  animation: tijeras-corta 0.28s ease-in-out infinite alternate;
+  transform-origin: 135px 67px;
+  animation: barbero-brazo 0.5s ease-in-out infinite alternate;
 }
-.tijeras-grande {
-  position: absolute;
-  top: 100px;
-  left: 0;
-  width: 110px;
-  height: 110px;
-  margin: -55px 0 0 -55px;
-  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.5));
-  animation: tijeras-avanza 1.3s cubic-bezier(0.4, 0, 0.6, 1) 0.2s both;
+.barbero-hoja {
+  transform-box: view-box;
+  transform-origin: 108px 58px;
+  animation: barbero-hoja 0.18s ease-in-out infinite alternate;
 }
-.tijeras-esquina {
-  position: absolute;
-  width: 70px;
-  height: 70px;
-  opacity: 0.5;
+.pelito {
+  animation: pelito-cae 1.2s ease-in infinite;
 }
-.tijeras-arriba {
-  top: 12%;
-  left: 10%;
-  transform: rotate(-35deg);
-}
-.tijeras-abajo {
-  right: 10%;
-  bottom: 12%;
-  transform: rotate(145deg);
-}
-.tijeras-esquina .tijeras-hoja {
-  animation-duration: 0.35s;
-}
-@keyframes tijeras-corta {
-  to {
-    transform: rotate(-16deg);
-  }
-}
-@keyframes tijeras-avanza {
+@keyframes barbero-brazo {
   from {
-    transform: translateX(-60px);
-    opacity: 0;
+    transform: rotate(-5deg);
   }
-  15% {
+  to {
+    transform: rotate(4deg);
+  }
+}
+@keyframes barbero-hoja {
+  to {
+    transform: rotate(-25deg);
+  }
+}
+@keyframes pelito-cae {
+  0% {
+    transform: translate(0, 0) rotate(0);
     opacity: 1;
   }
-  to {
-    transform: translateX(340px);
-  }
-}
-@keyframes mechon-cae {
-  to {
-    transform: translate(calc(var(--x) * 0.15), 260px) rotate(var(--giro));
+  100% {
+    transform: translate(-6px, 60px) rotate(140deg);
     opacity: 0;
   }
 }
