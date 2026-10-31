@@ -28,6 +28,22 @@ body {
   }
 }
 
+/* Menú principal: el barbero o el cuadrito que tocas da un brinquito. */
+@keyframes brinco {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.15) rotate(-6deg);
+  }
+  70% {
+    transform: scale(0.95) rotate(3deg);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Bienvenida: la animación dura ~2 s y luego todo se desvanece. */
 .bienvenida {
   position: fixed;
