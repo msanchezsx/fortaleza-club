@@ -1,58 +1,29 @@
-import Link from "next/link";
-import { EnlaceCuenta } from "@/components/EnlaceCuenta";
 import { EnVivo } from "@/components/EnVivo";
 import { EstadoAbierto } from "@/components/EstadoAbierto";
 import { LogoCastillo } from "@/components/LogoCastillo";
-import { NEGOCIO, mapsUrl, whatsappUrl } from "@/lib/negocio";
+import { MenuPrincipal } from "@/components/MenuPrincipal";
+import { NEGOCIO } from "@/lib/negocio";
 
 export default function Inicio() {
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-10 text-center">
-      <EnlaceCuenta />
-      <LogoCastillo className="h-24 w-24 text-oro" />
-      <h1 className="mt-4 font-serif text-4xl tracking-wide text-oro">{NEGOCIO.nombre}</h1>
-      <p className="font-serif text-lg tracking-[0.3em] text-crema/80 uppercase">
-        {NEGOCIO.subtitulo}
-      </p>
-      <div className="mt-6 h-px w-24 bg-oro/40" />
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center px-4 py-8 text-center">
+      <div className="flex items-center gap-3">
+        <LogoCastillo className="h-16 w-16 text-oro" />
+        <div className="text-left">
+          <h1 className="font-serif text-3xl tracking-wide text-oro">{NEGOCIO.nombre}</h1>
+          <p className="font-serif text-sm tracking-[0.3em] text-crema/80 uppercase">{NEGOCIO.subtitulo}</p>
+        </div>
+      </div>
 
-      <section className="mt-8 w-full rounded-2xl border border-oro/20 bg-carbon p-6">
+      <MenuPrincipal />
+
+      <section className="mt-6 w-full overflow-hidden rounded-2xl border border-oro/20 bg-carbon p-6">
         <EstadoAbierto />
-        <p className="mt-4 text-crema/90">{NEGOCIO.horario}</p>
-        <p className="mt-2 text-sm text-crema/60">{NEGOCIO.direccion}</p>
+        <p className="mt-3 text-sm text-crema/80">{NEGOCIO.horario}</p>
         <EnVivo />
       </section>
 
-      <div className="mt-6 flex w-full flex-col gap-3">
-        <Link
-          href="/citas"
-          className="rounded-xl border border-oro/50 px-6 py-4 font-semibold text-oro transition hover:bg-oro/10"
-        >
-          Horarios para cita
-        </Link>
-        <Link
-          href="/productos"
-          className="rounded-xl border border-oro/50 px-6 py-4 font-semibold text-oro transition hover:bg-oro/10"
-        >
-          Productos
-        </Link>
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-xl bg-oro px-6 py-4 font-semibold text-noche transition hover:bg-oro-claro"
-        >
-          Cómo llegar
-        </a>
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-xl border border-oro/50 px-6 py-4 font-semibold text-oro transition hover:bg-oro/10"
-        >
-          Escríbenos por WhatsApp
-        </a>
-      </div>
+      <p className="mt-6 text-xs text-crema/50">{NEGOCIO.direccion}</p>
     </main>
   );
 }

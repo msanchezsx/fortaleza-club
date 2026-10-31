@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CuentaRegresiva } from "@/components/CuentaRegresiva";
 import { MiFavorito } from "@/components/MiFavorito";
+import { estimarLiberacion } from "@/lib/estimado";
 import { estaAbierto } from "@/lib/negocio";
 import { crearClienteNavegador } from "@/lib/supabase/client";
 import { supabaseConfigurado } from "@/lib/supabase/config";
@@ -19,6 +20,7 @@ export function EnVivo() {
   const [duracion, setDuracion] = useState(35);
   const [favoritoId, setFavoritoId] = useState<string | null>(null);
   const [conSesion, setConSesion] = useState(false);
+  const [tocado, setTocado] = useState<{ id: string; nombre: string; texto: string } | null>(null);
 
   useEffect(() => {
     if (!supabaseConfigurado) return;
@@ -87,6 +89,20 @@ export function EnVivo() {
     };
   }, []);
 
+  // Al tocar un barbero: si está libre o cuánto le falta (se calcula al momento del toque).
+  function tocar(b: Barbero) {
+    const falta = estimarLiberacion([b.desde], duracion)?.segundos ?? 0;
+    const minutos = Math.ceil(falta / 60);
+    const texto = !abierto
+      ? "te esperamos a partir de las 11 am."
+      : b.estado === "libre"
+        ? "está libre, ¡llega sin esperar!"
+        : minutos <= 1
+          ? "está terminando un corte, se libera en cualquier momento."
+          : `está atendiendo, se libera en unos ${minutos} min.`;
+    setTocado({ id: b.id, nombre: b.nombre, texto });
+  }
+
   if (!supabaseConfigurado || barberos === null) {
     return <div className="mt-6 h-24 animate-pulse rounded-xl bg-crema/5" />;
   }
@@ -131,25 +147,49 @@ export function EnVivo() {
         </>
       )}
 
-      <ul className="mt-4 grid grid-cols-2 gap-2">
+      <p className="mt-4 text-xs text-crema/50">Toca a un barbero para ver si está libre</p>
+      <ul className="-mx-6 mt-1 flex snap-x gap-3 overflow-x-auto px-6 py-2 [scrollbar-width:none]">
         {barberos.map((b) => {
           const libre = abierto && b.estado === "libre";
+          const elegido = b.id === tocado?.id;
           return (
-            <li key={b.id} className="flex items-center gap-2 rounded-xl bg-noche/60 px-3 py-2">
-              <span
-                className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                  !abierto ? "bg-crema/30" : libre ? "bg-emerald-400" : "bg-ladrillo"
-                }`}
-              />
-              <span className="truncate text-sm">
-                {b.id === favoritoId && <span className="text-oro">★ </span>}
-                {b.nombre}
-              </span>
-              <span className="ml-auto text-xs text-crema/50">{!abierto ? "" : libre ? "Libre" : "Ocupado"}</span>
+            <li key={b.id} className="shrink-0 snap-start">
+              <button
+                type="button"
+                onClick={() => tocar(b)}
+                className="flex w-16 flex-col items-center gap-1 transition active:scale-90"
+              >
+                <span
+                  className={`relative flex h-14 w-14 items-center justify-center rounded-full bg-noche font-serif text-xl text-oro ring-2 ${
+                    !abierto ? "ring-crema/20" : libre ? "ring-emerald-400" : "ring-ladrillo"
+                  } ${elegido ? "animate-[brinco_0.4s_ease-out] ring-4" : ""}`}
+                >
+                  {b.nombre.trim().charAt(0).toUpperCase()}
+                  {b.id === favoritoId && (
+                    <span className="absolute -top-1 -right-1 text-sm text-oro">★</span>
+                  )}
+                  {abierto && (
+                    <span
+                      className={`absolute right-0 bottom-0 h-3.5 w-3.5 rounded-full border-2 border-carbon ${
+                        libre ? "bg-emerald-400" : "bg-ladrillo"
+                      }`}
+                    />
+                  )}
+                </span>
+                <span className="w-full truncate text-center text-xs">{b.nombre}</span>
+              </button>
             </li>
           );
         })}
       </ul>
+      {tocado && (
+        <p
+          key={tocado.id + tocado.texto}
+          className="mt-1 animate-[aparecer_0.3s_ease-out] rounded-xl bg-noche/60 px-3 py-2 text-sm"
+        >
+          <span className="text-oro">{tocado.nombre}:</span> {tocado.texto}
+        </p>
+      )}
       {!favorito && (
         <Link href="/cuenta" className="mt-3 block text-center text-sm text-oro/80 underline-offset-4 hover:underline">
           {conSesion ? "★ Elige tu barbero favorito" : "★ Crea tu cuenta y elige tu barbero favorito"}
