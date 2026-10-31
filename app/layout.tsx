@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cinzel, Inter } from "next/font/google";
+import { Bienvenida } from "@/components/Bienvenida";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -25,8 +26,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${cinzel.variable} ${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    <html lang="es" className={`${cinzel.variable} ${inter.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-sans">
+        <Bienvenida />
+        {children}
+      </body>
     </html>
   );
 }
