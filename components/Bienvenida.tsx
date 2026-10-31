@@ -1,8 +1,8 @@
 // Pantalla de bienvenida al abrir la app. Es solo CSS, así que no retrasa la
 // carga. Se muestra una vez por visita; al cambiar de página ya no sale.
 // Hay varias versiones para escoger; se prueban abriendo la app con
-// ?intro=caramelo o ?intro=barbero (así sale siempre, aunque ya se haya visto).
-const PREDETERMINADA = "caramelo";
+// ?intro=poste, ?intro=caramelo o ?intro=barbero (así sale siempre, aunque ya se haya visto).
+const PREDETERMINADA = "poste";
 
 const ELEGIR = `try{var d=document.documentElement,q=new URLSearchParams(location.search).get("intro");d.dataset.intro=q||"${PREDETERMINADA}";if(!q){if(sessionStorage.getItem("fz-bienvenida"))d.dataset.bienvenida="vista";else sessionStorage.setItem("fz-bienvenida","1")}}catch(e){}`;
 
@@ -10,6 +10,27 @@ export function Bienvenida() {
   return (
     <>
       <script dangerouslySetInnerHTML={{ __html: ELEGIR }} />
+
+      {/* Principal: caramelo clásico dentro de un aro dorado */}
+      <div className="bienvenida bienvenida-poste" aria-hidden="true">
+        <div className="bienvenida-centro">
+          <div className="poste">
+            <svg viewBox="0 0 200 200" className="poste-aro">
+              <circle cx="100" cy="100" r="94" />
+            </svg>
+            <div className="poste-cuerpo">
+              <span className="poste-bola" />
+              <span className="poste-tapa" />
+              <span className="poste-anillo" />
+              <span className="caramelo-tubo poste-tubo" />
+              <span className="poste-anillo" />
+              <span className="poste-tapa poste-tapa-abajo" />
+              <span className="poste-bola" />
+            </div>
+          </div>
+          <Nombre />
+        </div>
+      </div>
 
       {/* Opción 1: caramelo de barbería con la línea dorada en medio */}
       <div className="bienvenida bienvenida-caramelo" aria-hidden="true">
