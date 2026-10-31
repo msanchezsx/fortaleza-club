@@ -4,7 +4,7 @@ import { LogoCastillo } from "@/components/LogoCastillo";
 // carga. Se muestra una vez por visita; al cambiar de página ya no sale.
 // Hay varias versiones para escoger; se prueban abriendo la app con
 // ?intro=glitch, ?intro=poste, ?intro=caramelo o ?intro=barbero (así sale siempre, aunque ya se haya visto).
-const PREDETERMINADA = "glitch";
+const PREDETERMINADA = "poste";
 
 const ELEGIR = `try{var d=document.documentElement,q=new URLSearchParams(location.search).get("intro");d.dataset.intro=q||"${PREDETERMINADA}";if(!q){if(sessionStorage.getItem("fz-bienvenida"))d.dataset.bienvenida="vista";else sessionStorage.setItem("fz-bienvenida","1")}}catch(e){}`;
 
