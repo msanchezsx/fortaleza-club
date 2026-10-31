@@ -1,3 +1,5 @@
+import { LogoCastillo } from "@/components/LogoCastillo";
+
 // Pantalla de bienvenida al abrir la app. Es solo CSS, así que no retrasa la
 // carga. Se muestra una vez por visita; al cambiar de página ya no sale.
 // Hay varias versiones para escoger; se prueban abriendo la app con
@@ -11,24 +13,41 @@ export function Bienvenida() {
     <>
       <script dangerouslySetInnerHTML={{ __html: ELEGIR }} />
 
-      {/* Principal: caramelo clásico dentro de un aro dorado */}
+      {/* Principal: dentro de un aro dorado pasan el caramelo, la navaja, la
+          máquina y las tijeras, y al final el castillo con el nombre */}
       <div className="bienvenida bienvenida-poste" aria-hidden="true">
         <div className="bienvenida-centro">
           <div className="poste">
             <svg viewBox="0 0 200 200" className="poste-aro">
               <circle cx="100" cy="100" r="94" />
             </svg>
-            <div className="poste-cuerpo">
-              <span className="poste-bola" />
-              <span className="poste-tapa" />
-              <span className="poste-anillo" />
-              <span className="caramelo-tubo poste-tubo" />
-              <span className="poste-anillo" />
-              <span className="poste-tapa poste-tapa-abajo" />
-              <span className="poste-bola" />
+            <div className="pieza" style={{ animationDelay: "0.1s" }}>
+              <div className="poste-cuerpo">
+                <span className="poste-bola" />
+                <span className="poste-tapa" />
+                <span className="poste-anillo" />
+                <span className="caramelo-tubo poste-tubo" />
+                <span className="poste-anillo" />
+                <span className="poste-tapa poste-tapa-abajo" />
+                <span className="poste-bola" />
+              </div>
+            </div>
+            <div className="pieza" style={{ animationDelay: "0.55s" }}>
+              <Navaja />
+            </div>
+            <div className="pieza" style={{ animationDelay: "1s" }}>
+              <Maquina />
+            </div>
+            <div className="pieza" style={{ animationDelay: "1.45s" }}>
+              <TijerasAbiertas />
+            </div>
+            <div className="pieza pieza-final">
+              <LogoCastillo className="h-24 w-24 text-oro" />
             </div>
           </div>
-          <Nombre />
+          <div className="poste-nombre">
+            <Nombre />
+          </div>
         </div>
       </div>
 
@@ -144,6 +163,132 @@ function EscenaBarbero() {
             style={{ animationDelay: `${0.2 + i * 0.25}s` }}
           />
         ))}
+      </g>
+    </svg>
+  );
+}
+
+const PLATA = "#d8dce3";
+
+// Navaja abierta: mango azul marino con remaches dorados y hoja plateada.
+function Navaja() {
+  return (
+    <svg viewBox="0 0 200 200" className="herramienta">
+      <g transform="rotate(20 100 100)">
+        <path
+          d="M118 112 L118 34 Q118 24 128 24 L150 28 Q154 29 154 34 L150 112 Z"
+          fill={PLATA}
+        />
+        <path d="M150 30 L154 34 L150 112 L146 112 Z" fill="#ffffff" />
+        <path
+          d="M124 40 L144 36 M124 60 L144 56 M124 80 L144 76"
+          stroke="var(--color-ladrillo)"
+          strokeWidth="6"
+        />
+        <g transform="rotate(-35 134 112)">
+          <rect
+            x="24"
+            y="103"
+            width="112"
+            height="18"
+            rx="9"
+            fill="var(--color-marino)"
+            stroke="var(--color-oro)"
+            strokeWidth="2.5"
+          />
+          <circle cx="38" cy="112" r="3.5" fill="var(--color-oro)" />
+          <circle cx="124" cy="112" r="4.5" fill="var(--color-oro-claro)" />
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+// Máquina de cortar pelo con detalles dorados y cable.
+function Maquina() {
+  return (
+    <svg viewBox="0 0 200 200" className="herramienta">
+      <g transform="rotate(35 100 100)">
+        <path
+          d="M100 160 Q100 178 88 186"
+          fill="none"
+          stroke="var(--color-crema)"
+          strokeOpacity="0.6"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <rect
+          x="76"
+          y="48"
+          width="48"
+          height="114"
+          rx="20"
+          fill="#22252d"
+          stroke="var(--color-oro)"
+          strokeWidth="3"
+        />
+        <rect x="72" y="36" width="56" height="16" rx="4" fill={PLATA} />
+        <path
+          d="M76 36 v-7 M82 36 v-7 M88 36 v-7 M94 36 v-7 M100 36 v-7 M106 36 v-7 M112 36 v-7 M118 36 v-7 M124 36 v-7"
+          stroke={PLATA}
+          strokeWidth="3"
+        />
+        <rect
+          x="88"
+          y="72"
+          width="24"
+          height="44"
+          rx="5"
+          fill="none"
+          stroke="var(--color-oro)"
+          strokeWidth="2"
+        />
+        <path
+          d="M93 104 L107 84"
+          stroke="var(--color-oro-claro)"
+          strokeWidth="2"
+        />
+        <rect
+          x="93"
+          y="128"
+          width="14"
+          height="16"
+          rx="4"
+          fill="var(--color-oro)"
+        />
+      </g>
+    </svg>
+  );
+}
+
+// Tijeras de barbero abiertas: hojas plateadas y argollas doradas.
+function TijerasAbiertas() {
+  const hoja = (abre: number) => (
+    <g transform={`rotate(${abre})`}>
+      <path d="M-8 -5 L78 -2 Q82 0 78 2 L-8 5 Z" fill={PLATA} />
+      <path d="M-8 -5 L78 -2 L-8 -1 Z" fill="#ffffff" opacity="0.7" />
+      <path
+        d="M-8 0 L-26 -10"
+        stroke="var(--color-oro)"
+        strokeWidth="6"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="-38"
+        cy="-16"
+        r="13"
+        fill="none"
+        stroke="var(--color-oro)"
+        strokeWidth="6"
+      />
+    </g>
+  );
+  return (
+    <svg viewBox="0 0 200 200" className="herramienta">
+      <g transform="translate(100 104) rotate(-58)">
+        {hoja(-11)}
+        <g transform="scale(1 -1)">{hoja(-11)}</g>
+        <circle r="4.5" fill="var(--color-oro-claro)" />
       </g>
     </svg>
   );
