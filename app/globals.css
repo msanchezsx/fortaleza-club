@@ -44,6 +44,34 @@ body {
   }
 }
 
+/* Menú en rueda: aro con rayas tipo poste de barbería que gira con el dedo. */
+.rueda-aro {
+  background: repeating-conic-gradient(
+    from 0deg,
+    var(--color-oro) 0deg 6deg,
+    var(--color-marino) 6deg 15deg,
+    var(--color-crema) 15deg 18deg,
+    var(--color-ladrillo) 18deg 27deg,
+    var(--color-marino) 27deg 30deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 66%, #000 67%, #000 99%, transparent 100%);
+  mask: radial-gradient(circle, transparent 66%, #000 67%, #000 99%, transparent 100%);
+  opacity: 0.55;
+  transform: rotate(var(--giro));
+  animation: rueda-entra 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes rueda-entra {
+  from {
+    rotate: -240deg;
+    opacity: 0;
+  }
+  to {
+    rotate: 0deg;
+    opacity: 0.55;
+  }
+}
+
 /* Bienvenida: la animación dura ~2 s y luego todo se desvanece. */
 .bienvenida {
   position: fixed;
