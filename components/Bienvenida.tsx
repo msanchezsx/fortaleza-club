@@ -3,8 +3,8 @@ import { LogoCastillo } from "@/components/LogoCastillo";
 // Pantalla de bienvenida al abrir la app. Es solo CSS, así que no retrasa la
 // carga. Se muestra una vez por visita; al cambiar de página ya no sale.
 // Hay varias versiones para escoger; se prueban abriendo la app con
-// ?intro=poste, ?intro=caramelo o ?intro=barbero (así sale siempre, aunque ya se haya visto).
-const PREDETERMINADA = "poste";
+// ?intro=glitch, ?intro=poste, ?intro=caramelo o ?intro=barbero (así sale siempre, aunque ya se haya visto).
+const PREDETERMINADA = "glitch";
 
 const ELEGIR = `try{var d=document.documentElement,q=new URLSearchParams(location.search).get("intro");d.dataset.intro=q||"${PREDETERMINADA}";if(!q){if(sessionStorage.getItem("fz-bienvenida"))d.dataset.bienvenida="vista";else sessionStorage.setItem("fz-bienvenida","1")}}catch(e){}`;
 
@@ -13,7 +13,31 @@ export function Bienvenida() {
     <>
       <script dangerouslySetInnerHTML={{ __html: ELEGIR }} />
 
-      {/* Principal: dentro de un aro dorado pasan el caramelo, la navaja, la
+      {/* Principal: pantalla "descompuesta" con los colores de la barbería y
+          al final el castillo con el nombre, como si la señal regresara */}
+      <div className="bienvenida bienvenida-glitch" aria-hidden="true">
+        <div className="glitch-franja glitch-arriba" />
+        <div className="glitch-franja glitch-linea" style={{ top: "26%" }} />
+        <div className="glitch-franja glitch-linea" style={{ top: "29%" }} />
+        <div
+          className="glitch-franja glitch-linea glitch-delgada"
+          style={{ top: "39%" }}
+        />
+        <div className="glitch-franja glitch-linea" style={{ top: "66%" }} />
+        <div
+          className="glitch-franja glitch-linea glitch-delgada"
+          style={{ top: "74%" }}
+        />
+        <div className="glitch-franja glitch-linea" style={{ top: "97%" }} />
+        <div className="glitch-ruido" />
+        <div className="glitch-ruido glitch-ruido-2" />
+        <div className="bienvenida-centro glitch-logo">
+          <LogoCastillo className="h-24 w-24 text-oro" />
+          <Nombre />
+        </div>
+      </div>
+
+      {/* Opción: dentro de un aro dorado pasan el caramelo, la navaja, la
           máquina y las tijeras, y al final el castillo con el nombre */}
       <div className="bienvenida bienvenida-poste" aria-hidden="true">
         <div className="bienvenida-centro">

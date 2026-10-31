@@ -39,6 +39,7 @@ body {
     bienvenida-fin 0s linear 2.8s forwards;
 }
 html[data-bienvenida="vista"] .bienvenida,
+html:not([data-intro="glitch"]) .bienvenida-glitch,
 html:not([data-intro="poste"]) .bienvenida-poste,
 html:not([data-intro="caramelo"]) .bienvenida-caramelo,
 html:not([data-intro="barbero"]) .bienvenida-barbero {
@@ -139,7 +140,182 @@ html:not([data-intro="barbero"]) .bienvenida-barbero {
     visibility: hidden;
   }
 }
-/* Principal: caramelo clásico dentro de un aro dorado */
+/* Principal: pantalla descompuesta (~3.6 s). Franjas que brincan, ruido de
+   colores, un momento oscuro y regresa la señal con el castillo. */
+.bienvenida-glitch {
+  overflow: hidden;
+  background: #050608;
+  animation:
+    bienvenida-sale 0.5s ease-in 3.1s forwards,
+    bienvenida-fin 0s linear 3.6s forwards;
+}
+.glitch-franja {
+  position: absolute;
+  left: 0;
+  right: 0;
+  animation:
+    glitch-brinca 0.4s steps(1) infinite,
+    glitch-apaga 0s linear 1.3s forwards;
+}
+.glitch-arriba {
+  top: 0;
+  height: 22%;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-crema) 0 2px,
+    #7fd6c8 2px 4px,
+    transparent 4px 6px,
+    var(--color-marino) 6px 8px,
+    var(--color-crema) 8px 9px,
+    transparent 9px 11px,
+    var(--color-ladrillo) 11px 13px,
+    var(--color-oro) 13px 14px,
+    transparent 14px 17px
+  );
+}
+.glitch-linea {
+  height: 4px;
+  background: var(--color-ladrillo);
+  box-shadow: 0 3px 0 var(--color-oro);
+  animation-duration: 0.3s, 0s;
+}
+.glitch-delgada {
+  height: 1px;
+  background: #7fd6c8;
+  box-shadow: none;
+  opacity: 0.6;
+}
+/* Ruido de colores: rayas de distintos tamaños que se mueven a saltos */
+.glitch-ruido {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 3px,
+      rgb(162 70 47 / 0.9) 3px 5px,
+      transparent 5px 9px,
+      rgb(201 164 92 / 0.8) 9px 10px,
+      transparent 10px 17px,
+      rgb(243 234 216 / 0.7) 17px 18px,
+      transparent 18px 23px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 7px,
+      rgb(30 42 68 / 0.4) 7px 19px,
+      transparent 19px 31px,
+      rgb(127 214 200 / 0.25) 31px 34px,
+      transparent 34px 47px
+    );
+  animation:
+    glitch-ruido 0.25s steps(4) infinite,
+    glitch-ruido-ve 2.2s linear 0.9s forwards;
+}
+.glitch-ruido-2 {
+  transform: scaleY(-1);
+  background-size:
+    100% 41px,
+    83px 100%;
+  animation:
+    glitch-ruido 0.18s steps(3) infinite reverse,
+    glitch-ruido-ve 2.2s linear 1s forwards;
+}
+.glitch-logo {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation:
+    glitch-logo-entra 1.1s steps(1) 1.9s forwards,
+    glitch-logo-tiembla 0.12s steps(1) 1.9s 8;
+}
+@keyframes glitch-brinca {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-14px) scaleY(1.4);
+  }
+  50% {
+    transform: translateX(9px);
+  }
+  75% {
+    transform: translateX(-4px) scaleY(0.6);
+  }
+}
+@keyframes glitch-apaga {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes glitch-ruido {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 0 120px, -160px 0;
+  }
+}
+/* El ruido aparece fuerte, se apaga, regresa un instante y desaparece */
+@keyframes glitch-ruido-ve {
+  0% {
+    opacity: 0;
+  }
+  8%,
+  30% {
+    opacity: 1;
+  }
+  38%,
+  52% {
+    opacity: 0.08;
+  }
+  58%,
+  70% {
+    opacity: 0.9;
+  }
+  78%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes glitch-logo-entra {
+  0% {
+    opacity: 0.4;
+  }
+  10% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  30% {
+    opacity: 0.2;
+  }
+  40%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes glitch-logo-tiembla {
+  0% {
+    transform: translate(-6px, 0);
+    filter: drop-shadow(4px 0 var(--color-ladrillo))
+      drop-shadow(-4px 0 #7fd6c8);
+  }
+  33% {
+    transform: translate(5px, 2px) skewX(-8deg);
+    filter: drop-shadow(-3px 0 var(--color-ladrillo))
+      drop-shadow(3px 0 var(--color-marino));
+  }
+  66% {
+    transform: translate(-2px, -1px);
+    filter: drop-shadow(2px 0 var(--color-oro));
+  }
+}
+
+/* Opción: caramelo clásico dentro de un aro dorado */
 .bienvenida-poste {
   background: radial-gradient(circle at 50% 40%, #232731, var(--color-noche) 70%);
   animation:
